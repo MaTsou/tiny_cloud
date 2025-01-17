@@ -19,8 +19,8 @@ describe TinyCloud::Storage do
     @storage.request_processor.http_client.expect :call, true do |request|
       request.url = @storage.url
       request.method = :get
-      request.options.keys.include? :header
-      request.options[:header].keys.include? AUTH_TOKEN_KEY
+      request.options.keys.include? :headers
+      request.options[:headers].keys.include? AUTH_TOKEN_KEY
     end
 
     @storage.request_processor.stub :warm_up, true do
@@ -34,8 +34,8 @@ describe TinyCloud::Storage do
     @storage.request_processor.http_client.expect :call, true do |request|
       request.url = [ @storage.url, path ].join('/')
       request.method = :get
-      request.options.keys.include? :header
-      request.options[:header].keys.include? AUTH_TOKEN_KEY
+      request.options.keys.include? :headers
+      request.options[:headers].keys.include? AUTH_TOKEN_KEY
     end
 
     @storage.request_processor.stub :warm_up, true do
@@ -49,8 +49,8 @@ describe TinyCloud::Storage do
     @storage.request_processor.http_client.expect :call, true do |request|
       request.url = [ @storage.url, path ].join('/')
       request.method = :delete
-      request.options.keys.include? :header
-      request.options[:header].keys.include? AUTH_TOKEN_KEY
+      request.options.keys.include? :headers
+      request.options[:headers].keys.include? AUTH_TOKEN_KEY
     end
 
     @storage.request_processor.stub :warm_up, true do

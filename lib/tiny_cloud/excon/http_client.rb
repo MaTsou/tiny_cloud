@@ -6,8 +6,8 @@ module TinyCloud
     class HttpClient
       attr_reader :response_formatter
 
-      def initialize( response_formatter = TinyCloud::Excon::ResponseFormatter )
-        @response_formatter = response_formatter
+      def initialize( formatter = TinyCloud::Excon::ResponseFormatter.new )
+        @response_formatter = formatter
       end
 
       def call( request )

@@ -30,10 +30,10 @@ module TinyCloud
       end
     end
 
-    def temp_url( url, prefix )
+    def temp_url( caller_url:, url:, method:, life_time:, prefix: )
       warm_up( :check_authentication )
-      warm_up( :check_temp_url_keys, url )
-      account.build_temp_url( url, prefix )
+      warm_up( :check_temp_url_keys, caller_url )
+      account.build_temp_url( url:, method:, life_time:, prefix: )
     end
 
     private
@@ -41,7 +41,7 @@ module TinyCloud
     def build_options( action, rest )
       { body: rest[:object] }
         .compact
-        .merge( header: account.header )
+        .merge( headers: account.header )
     end
 
     def formatted_request( url:, method:, options: )

@@ -1,4 +1,5 @@
 require 'json'
+require_relative 'temp_url_builder'
 
 module TinyCloud
   module Openstack
@@ -14,15 +15,22 @@ module TinyCloud
       Key = Struct.new( :id, :header, :value, :birth_date )
 
       attr_accessor :account, :keys
+      attr_reader :caller_url
 
       def initialize( account )
         @account = account
       end
 
-      def build_temp_url( url, prefix )
+      def build_temp_url( url:, method:, life_time:, prefix: )
+        Openstack::TempUrlBuilder.new(
+          root_url: account.configuration.root_url,
+          url:, method:, life_time:, prefix:,
+          active_temp_url_key: keys[:active].value,
+        ).call
       end
 
-      def check_temp_url_keys
+      def check_temp_url_keys( caller_url )
+        @caller_url = caller_url
         temp_url_keys_missing ||
           temp_url_keys_expired ||
           true
@@ -30,21 +38,22 @@ module TinyCloud
 
       private
 
-      def header_name
-        HEADER_NAMES[ active_key ]
-      end
-
       def retrieves_temp_url_keys( response )
         ids = { first: :active, second: :other }
 
-        @keys = HEADER_NAMES.merge do |k, v|
-          Key.new(
-            id: k, 
-            header: v,
-            value: response.headers.fetch( v.downcase, nil ),
-            birth_date: Date.today
-          ).transform_keys( ids )
-        end
+        case response
+        in status2xx: response
+          @keys = HEADER_NAMES.map do |k, v|
+            [ k,
+              Key.new(
+                id: k,
+                header: v,
+                value: response.headers.fetch( v.downcase, nil ),
+                birth_date: Time.now
+              )
+            ]
+          end.to_h.transform_keys( ids )
+        else end
       end
 
       def reset_temp_url_key( response )
@@ -55,15 +64,11 @@ module TinyCloud
         # TODO to be continued
       end
 
-      def permute_keys
-        keys.transform_keys!( active: :other, other: :active )
-      end
-
       def retrieves_temp_url_keys_request
         {
-          url: [ account.root_url, "info" ].join( '/' ),
+          url: caller_url,
           method: :get,
-          options: { headers: header }
+          options: { headers: account.header }
         }
       end
 

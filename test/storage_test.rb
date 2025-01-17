@@ -73,7 +73,9 @@ describe TinyCloud::Storage do
     end
 
     it "does not delegate temp_url if not container type storage" do
-      _( @storage.temp_url( 'path' ) ).must_equal :unsupported
+      _(
+        @storage.temp_url( 'path', method: :get, life_time: 300 )
+      ).must_equal :unsupported
     end
 
     it "delegates temp_url to request_processor when container type storage" do
@@ -86,7 +88,7 @@ describe TinyCloud::Storage do
         args[:url] == [ container.url, path ].join('/')
       end
       _(
-        container.temp_url( path )
+        container.temp_url( path, method: :get, life_time: 300 )
       ).must_equal :delegated
       container.request_processor.verify
     end

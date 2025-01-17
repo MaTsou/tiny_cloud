@@ -5,7 +5,7 @@ require_relative 'configuration'
 module TinyCloud
   module Openstack
     class Account
-      include TinyCloud::Openstack::TokenManager
+      include TinyCloud::Openstack::TokenManager, TinyCloud::TimeCalculation
 
       attr_accessor :auth_token, :auth_token_birth
       attr_reader :temp_url_manager
@@ -26,14 +26,17 @@ module TinyCloud
       end
 
       def check_authentication
-        return true if auth_token_life_period.include? now
+        return true if token_still_valid?
         { action_needed: :renew_token, request: reset_auth_token_request }
       end
 
       def renew_token( response )
         # TODO manage response issues..
-        @auth_token = response.headers['x-subject-token']
-        @auth_token_birth = now
+        case response
+        in status2xx: response
+          @auth_token = response.headers['x-subject-token']
+          @auth_token_birth = now
+        else end
       end
 
       def method_missing( name, *args, **options )
@@ -43,21 +46,6 @@ module TinyCloud
           temp_url_manager.send( name, *args, **options )
         else
           super
-        end
-      end
-
-      def now
-        Time.now
-      end
-
-      def convert_in_seconds( hash )
-        hash.reduce( 0 ) do |seconds, delay|
-          case [delay].to_h
-          in days:
-            seconds += 86400 * days
-          else
-            seconds
-          end
         end
       end
     end

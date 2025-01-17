@@ -1,6 +1,8 @@
 module TinyCloud
   module Openstack
     module TokenManager
+      include TinyCloud::TimeCalculation
+
       AUTH_TOKEN_LIFE_TIME = { days: 30 }
 
       private
@@ -13,10 +15,8 @@ module TinyCloud
         }
       end
 
-      def auth_token_life_period
-        (0..1).map do |t|
-          auth_token_birth + t * convert_in_seconds(AUTH_TOKEN_LIFE_TIME)
-        end
+      def token_still_valid?
+        now < auth_token_birth + convert_in_seconds( AUTH_TOKEN_LIFE_TIME )
       end
 
       def token_url
