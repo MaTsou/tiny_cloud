@@ -4,6 +4,8 @@ require_relative 'temp_url_builder'
 module TinyCloud
   module Openstack
     class TempUrlManager
+      include TinyCloud::TimeCalculation
+
       TEMP_URL_KEY_LIFE_TIME = { days: 30 }
       TEMP_URL_LIFE_TIME = 300 # 5 minutes
       HEADER_NAMES = {
@@ -49,7 +51,7 @@ module TinyCloud
                 id: k,
                 header: v,
                 value: response.headers.fetch( v.downcase, nil ),
-                birth_date: Time.now
+                birth_date: now
               )
             ]
           end.to_h.transform_keys( ids )
