@@ -6,13 +6,13 @@ module TinyCloud
       erase: :delete
     }
 
-    attr_accessor :http_client, :account, :request_formatter
+    attr_accessor :http_client, :account, :request_builder
 
     def initialize( http_client: nil, account: nil )
       @http_client = http_client
       @account = account
       yield self if block_given?
-      @request_formatter = Struct.new( :url, :method, :options )
+      @request_builder = TinyCloud::RequestBuilder.new( @account )
     end
 
     def method_missing( action, **options )
@@ -20,14 +20,12 @@ module TinyCloud
 
       warm_up( :check_authentication )
 
-      case options
-      in url: url, **rest
-        formatted_request(
-          url: url, method: API[ action ], options: build_options( action, rest )
-        )
-      else
-        raise KeyError, "A url is needed !"
-      end
+      # receiving a list of actions : method_missing( action, *args )
+      # I need to delegate this to a RequestBuilder object.. It collects 
+      # requests from a list and format them to be processed..
+      #method = API[ action ]
+      #request( args.map { |opt| request_builder.call( method: method, **opt ) } )
+      request( method: API[ action ], **options )
     end
 
     def temp_url( caller_url:, url:, method:, life_time:, prefix: )
@@ -38,21 +36,14 @@ module TinyCloud
 
     private
 
-    def build_options( action, rest )
-      { body: rest[:object] }
-        .compact
-        .merge( headers: account.header )
-    end
-
-    def formatted_request( url:, method:, options: )
-      http_client.call( request_formatter.new( url, method, options ) )
+    def request( method:, **options )
+      http_client.call( request_builder.call( method:, **options ) )
     end
 
     def warm_up( method_name, *args )
       case account.send( method_name, *args )
       in action_needed: action_name, **rest
-        account.send(
-          action_name, formatted_request( **rest[:request] )
+        account.send( action_name, request( **rest[:request] )
         )
       else end
     end

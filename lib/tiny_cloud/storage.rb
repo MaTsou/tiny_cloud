@@ -26,7 +26,7 @@ module TinyCloud
     # TODO add this syntax
     # add( [ first_path, first_object ], [ second_path, second_object ] )
     def add( path, object = nil )
-      request_processor.write url: join_paths( url, path ), object: object
+      request_processor.write url: join_paths( url, path ), body: object
     end
 
     # remove( single_path, single_object )
