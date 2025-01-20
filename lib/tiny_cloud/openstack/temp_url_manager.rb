@@ -23,6 +23,9 @@ module TinyCloud
         @account = account
       end
 
+      # Hey. Why not a CheckSomething object to manage { test + request + 
+      # handling_response }.. This is redundant pattern : missing_keys; 
+      # renew_keys
       def build_temp_url( url:, method:, life_time:, prefix: )
         Openstack::TempUrlBuilder.new(
           root_url: account.configuration.root_url,
@@ -33,9 +36,7 @@ module TinyCloud
 
       def check_temp_url_keys( caller_url )
         @caller_url = caller_url
-        temp_url_keys_missing ||
-          temp_url_keys_expired ||
-          true
+        temp_url_keys_missing || temp_url_keys_expired || true
       end
 
       private
@@ -75,6 +76,7 @@ module TinyCloud
       end
 
       def reset_temp_url_key_request
+        {}
       end
 
       def temp_url_keys_missing
@@ -88,12 +90,12 @@ module TinyCloud
         {
           action_needed: :reset_temp_url_key,
           request: reset_temp_url_key_request
-        } unless expired?( keys[:active] )
+        } if expired?( keys[:active] )
       end
 
       def expired?( key )
-        # check if expire tomorrow
-        key.birth_date.advance( TEMP_URL_KEY_LIFE_TIME ) < Date.today.succ
+        # check if expired tomorrow
+        key.birth_date + convert_in_seconds( TEMP_URL_KEY_LIFE_TIME ) < tomorrow
       end
     end
   end
