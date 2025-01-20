@@ -6,6 +6,10 @@ module TinyCloud
       Time.now
     end
 
+    def tomorrow
+      now + convert_in_seconds( { days: 1 } )
+    end
+
     # args is { days: n }
     # for now only days is supported
     def convert_in_seconds( hash )
