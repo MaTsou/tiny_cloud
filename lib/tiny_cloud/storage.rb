@@ -43,7 +43,7 @@ module TinyCloud
       request_processor.read url: join_paths( url, path )
     end
 
-    def temp_url( path, life_time:, method:, prefix: nil )
+    def temp_url( path, method:, life_time: nil, prefix: nil )
       # may be an Openstack only thing ?!
       return :unsupported unless type == :container
       request_processor.temp_url(

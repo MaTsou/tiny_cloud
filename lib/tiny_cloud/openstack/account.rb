@@ -7,14 +7,16 @@ module TinyCloud
     class Account
       include TinyCloud::Openstack::TokenManager, TinyCloud::TimeCalculation
 
-      attr_accessor :auth_token, :auth_token_birth
+      attr_accessor :auth_token, :auth_token_birth, :auth_token_reset_after,
+        :temp_url_key_reset_after, :temp_url_life_time
       attr_reader :temp_url_manager
 
       def initialize
         yield configuration
         @temp_url_manager = Openstack::TempUrlManager.new( self )
         # set an expired token birth to force renewing it !
-        @auth_token_birth = now - 2 * convert_in_seconds(AUTH_TOKEN_LIFE_TIME)
+        @auth_token_birth = now -
+          2 * convert_in_seconds( configuration.auth_token_reset_after )
       end
 
       def configuration

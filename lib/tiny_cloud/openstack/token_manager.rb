@@ -3,8 +3,6 @@ module TinyCloud
     module TokenManager
       include TinyCloud::TimeCalculation
 
-      AUTH_TOKEN_LIFE_TIME = { days: 30 }
-
       private
 
       def reset_auth_token_request
@@ -16,7 +14,8 @@ module TinyCloud
       end
 
       def token_still_valid?
-        now < auth_token_birth + convert_in_seconds( AUTH_TOKEN_LIFE_TIME )
+        now < auth_token_birth +
+          convert_in_seconds( configuration.auth_token_reset_after )
       end
 
       def token_url

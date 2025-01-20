@@ -6,8 +6,6 @@ module TinyCloud
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      TEMP_URL_KEY_LIFE_TIME = { days: 30 }
-      TEMP_URL_LIFE_TIME = 300 # 5 minutes
       HEADER_NAMES = {
         # containers only then !
         first: "X-Container-Meta-Temp-URL-Key",
@@ -28,8 +26,9 @@ module TinyCloud
       # renew_keys
       def build_temp_url( url:, method:, life_time:, prefix: )
         Openstack::TempUrlBuilder.new(
-          root_url: account.configuration.root_url,
-          url:, method:, life_time:, prefix:,
+          root_url: configuration.root_url,
+          url:, method:, prefix:,
+          life_time: (life_time || configuration.temp_url_key_default_life_time),
           active_temp_url_key: keys[:active].value,
         ).call
       end
@@ -40,6 +39,10 @@ module TinyCloud
       end
 
       private
+
+      def configuration
+        account.configuration
+      end
 
       def retrieves_temp_url_keys( response )
         ids = { first: :active, second: :other }
@@ -95,7 +98,12 @@ module TinyCloud
 
       def expired?( key )
         # check if expired tomorrow
-        key.birth_date + convert_in_seconds( TEMP_URL_KEY_LIFE_TIME ) < tomorrow
+        death_date( key ) < tomorrow
+      end
+
+      def death_date( key )
+        key.birth_date +
+          convert_in_seconds( configuration.temp_url_key_reset_after )
       end
     end
   end
