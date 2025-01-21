@@ -8,23 +8,25 @@ module TinyCloud
 
       HEADER_NAMES = {
         # containers only then !
+        # TODO check if this is container dependant or not. Because later case 
+        # would lead to issues when multiple apps..
         first: "X-Container-Meta-Temp-URL-Key",
         second: "X-Container-Meta-Temp-URL-Key-2",
       }
 
       Key = Struct.new( :id, :header, :value, :birth_date )
 
-      attr_accessor :account, :keys
-      attr_reader :caller_url
+      attr_reader :account, :configuration, :keys, :warms_up, :caller_url
 
       def initialize( account )
         @account = account
+        @configuration = account.configuration
+        @warms_up = %i( tuk_missing tuk_expired ).map do |w|
+            TinyCloud::WarmUp.new( w, self )
+          end
       end
 
-      # Hey. Why not a CheckSomething object to manage { test + request + 
-      # handling_response }.. This is redundant pattern : missing_keys; 
-      # renew_keys
-      def build_temp_url( url:, method:, life_time:, prefix: )
+      def build_temp_url( caller_url:, url:, method:, life_time:, prefix: )
         Openstack::TempUrlBuilder.new(
           root_url: configuration.root_url,
           url:, method:, prefix:,
@@ -33,18 +35,21 @@ module TinyCloud
         ).call
       end
 
-      def check_temp_url_keys( caller_url )
-        @caller_url = caller_url
-        temp_url_keys_missing || temp_url_keys_expired || true
+      # ----------------------------------------
+      # tuk missing warm up
+      # ----------------------------------------
+      def tuk_missing?( *args, **options )
+        !keys
       end
 
-      private
-
-      def configuration
-        account.configuration
+      def tuk_missing_request( *args, **options )
+        {
+          url: options[:caller_url],
+          method: :get
+        }
       end
 
-      def retrieves_temp_url_keys( response )
+      def tuk_missing_handling( response )
         ids = { first: :active, second: :other }
 
         case response
@@ -62,7 +67,18 @@ module TinyCloud
         else end
       end
 
-      def reset_temp_url_key( response )
+      # ----------------------------------------
+      # tuk expired warm up
+      # ----------------------------------------
+      def tuk_expired?( *args, **options )
+        return false
+        death_date( keys[:active] ) < tomorrow
+      end
+
+      def tuk_expired_request( *args, **options )
+      end
+
+      def tuk_expired_handling( response )
         case response
         in status2xx:
           JSON.parse response.body
@@ -70,36 +86,7 @@ module TinyCloud
         # TODO to be continued
       end
 
-      def retrieves_temp_url_keys_request
-        {
-          url: caller_url,
-          method: :get,
-          options: { headers: account.header }
-        }
-      end
-
-      def reset_temp_url_key_request
-        {}
-      end
-
-      def temp_url_keys_missing
-        {
-          action_needed: :retrieves_temp_url_keys,
-          request: retrieves_temp_url_keys_request
-        } unless keys
-      end
-
-      def temp_url_keys_expired
-        {
-          action_needed: :reset_temp_url_key,
-          request: reset_temp_url_key_request
-        } if expired?( keys[:active] )
-      end
-
-      def expired?( key )
-        # check if expired tomorrow
-        death_date( key ) < tomorrow
-      end
+      private
 
       def death_date( key )
         key.birth_date +

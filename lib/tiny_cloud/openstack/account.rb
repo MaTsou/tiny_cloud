@@ -5,18 +5,14 @@ require_relative 'configuration'
 module TinyCloud
   module Openstack
     class Account
-      include TinyCloud::Openstack::TokenManager, TinyCloud::TimeCalculation
+      include TinyCloud::TimeCalculation
 
-      attr_accessor :auth_token, :auth_token_birth, :auth_token_reset_after,
-        :temp_url_key_reset_after, :temp_url_life_time
-      attr_reader :temp_url_manager
+      attr_reader :temp_url_manager, :token_manager
 
       def initialize
         yield configuration
         @temp_url_manager = Openstack::TempUrlManager.new( self )
-        # set an expired token birth to force renewing it !
-        @auth_token_birth = now -
-          2 * convert_in_seconds( configuration.auth_token_reset_after )
+        @token_manager = Openstack::TokenManager.new( self )
       end
 
       def configuration
@@ -24,21 +20,16 @@ module TinyCloud
       end
 
       def header
-        { 'X-Auth-Token' => auth_token }
+        { 'X-Auth-Token' => token_manager.auth_token }
       end
 
-      def check_authentication
-        return true if token_still_valid?
-        { action_needed: :renew_token, request: reset_auth_token_request }
-      end
-
-      def renew_token( response )
-        # TODO manage response issues..
-        case response
-        in status2xx: response
-          @auth_token = response.headers['x-subject-token']
-          @auth_token_birth = now
-        else end
+      def warms_up_for( action )
+        case action
+        when :read, :write, :erase
+          token_manager.warms_up
+        when :temp_url
+          token_manager.warms_up.concat temp_url_manager.warms_up
+        end
       end
 
       def method_missing( name, *args, **options )
