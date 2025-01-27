@@ -21,7 +21,7 @@ describe TinyCloud::Openstack do
       config.user_domain_name = 'default'
       config.auth_url = 'This_is_auth_url'
       config.password = 'My_wonderful_and_unbreakable_pwv'
-      config.temp_url_key_default_life_time = 300
+      config.temp_url_default_life_time = 300
       config.temp_url_key_reset_after = { days: 30 }
       config.auth_token_reset_after = { days: 30 }
     end

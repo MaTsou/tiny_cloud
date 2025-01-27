@@ -16,27 +16,24 @@ module TinyCloud
 
       Key = Struct.new( :id, :header, :value, :birth_date )
 
-      attr_reader :account, :configuration, :keys, :warms_up, :caller_url
+      attr_reader :account, :keys, :warms_up, :caller_url,
+        :builder, :reset_key_after
 
       def initialize( account )
         @account = account
-        @configuration = account.configuration
+        @reset_key_after = account.configuration.temp_url_key_reset_after
+        @builder = Openstack::TempUrlBuilder.new( account.configuration )
         @warms_up = %i( tuk_missing tuk_expired ).map do |w|
-            TinyCloud::WarmUp.new( w, self )
-          end
+          TinyCloud::WarmUp.new( w, self )
+        end
       end
 
       def build_temp_url( caller_url:, url:, method:, life_time:, prefix: )
-        Openstack::TempUrlBuilder.new(
-          root_url: configuration.root_url,
-          url:, method:, prefix:,
-          life_time: (life_time || configuration.temp_url_key_default_life_time),
-          active_temp_url_key: keys[:active].value,
-        ).call
+        builder.call( url:, method:, prefix:, life_time: )
       end
 
       # ----------------------------------------
-      # tuk missing warm up
+      # start : tuk missing warm up
       # ----------------------------------------
       def tuk_missing?( *args, **options )
         !keys
@@ -65,10 +62,14 @@ module TinyCloud
             ]
           end.to_h.transform_keys( ids )
         else end
+        push_key_to_builder
       end
+      # ----------------------------------------
+      # end : tuk missing warm up
+      # ----------------------------------------
 
       # ----------------------------------------
-      # tuk expired warm up
+      # start : tuk expired warm up
       # ----------------------------------------
       def tuk_expired?( *args, **options )
         return false
@@ -84,13 +85,20 @@ module TinyCloud
           JSON.parse response.body
         else end # FIXME server error managment needed..
         # TODO to be continued
+        push_key_to_builder
       end
+      # ----------------------------------------
+      # end : tuk expired warm up
+      # ----------------------------------------
 
       private
 
+      def push_key_to_builder
+        builder.set_active_key keys[:active].value
+      end
+
       def death_date( key )
-        key.birth_date +
-          convert_in_seconds( configuration.temp_url_key_reset_after )
+        key.birth_date + convert_in_seconds( reset_key_after )
       end
     end
   end
