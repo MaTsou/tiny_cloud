@@ -16,15 +16,15 @@ module TinyCloud
 
       Key = Struct.new( :id, :header, :value, :birth_date )
 
-      attr_reader :account, :keys, :warms_up, :caller_url,
+      attr_reader :account, :keys, :hooks, :caller_url,
         :builder, :reset_key_after
 
       def initialize( account )
         @account = account
         @reset_key_after = account.configuration.temp_url_key_reset_after
         @builder = Openstack::TempUrlBuilder.new( account.configuration )
-        @warms_up = %i( tuk_missing tuk_expired ).map do |w|
-          TinyCloud::WarmUp.new( w, self )
+        @hooks = %i( tuk_missing tuk_expired ).map do |w|
+          TinyCloud::Hook.new( w, self )
         end
       end
 
@@ -33,7 +33,7 @@ module TinyCloud
       end
 
       # ----------------------------------------
-      # start : tuk missing warm up
+      # start : tuk missing hook
       # ----------------------------------------
       def tuk_missing?( *args, **options )
         !keys
@@ -65,11 +65,11 @@ module TinyCloud
         push_key_to_builder
       end
       # ----------------------------------------
-      # end : tuk missing warm up
+      # end : tuk missing hook
       # ----------------------------------------
 
       # ----------------------------------------
-      # start : tuk expired warm up
+      # start : tuk expired hook
       # ----------------------------------------
       def tuk_expired?( *args, **options )
         return false
@@ -88,7 +88,7 @@ module TinyCloud
         push_key_to_builder
       end
       # ----------------------------------------
-      # end : tuk expired warm up
+      # end : tuk expired hook
       # ----------------------------------------
 
       private

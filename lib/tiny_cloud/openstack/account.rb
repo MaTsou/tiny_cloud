@@ -23,12 +23,12 @@ module TinyCloud
         { 'X-Auth-Token' => token_manager.auth_token }
       end
 
-      def warms_up_for( action )
+      def hooks_for( action )
         case action
         when :read, :write, :erase
-          token_manager.warms_up
+          token_manager.hooks
         when :temp_url
-          token_manager.warms_up.concat temp_url_manager.warms_up
+          token_manager.hooks.concat temp_url_manager.hooks
         end
       end
 

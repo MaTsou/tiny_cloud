@@ -3,19 +3,19 @@ module TinyCloud
     class TokenManager
       include TinyCloud::TimeCalculation
 
-      attr_reader :account, :configuration, :warms_up,
+      attr_reader :account, :configuration, :hooks,
         :auth_token_birth, :auth_token
 
       def initialize( account )
         @account = account
         @configuration = account.configuration
-        @warms_up = [ TinyCloud::WarmUp.new( :auth_token_expired, self ) ]
+        @hooks = [ TinyCloud::Hook.new( :auth_token_expired, self ) ]
         @auth_token_birth = now -
           2 * convert_in_seconds( @configuration.auth_token_reset_after )
       end
 
       # ----------------------------------------
-      # start : auth_token_expired warm up
+      # start : auth_token_expired hook
       # ----------------------------------------
       def auth_token_expired?( *args, **options )
         now > auth_token_birth +
@@ -39,7 +39,7 @@ module TinyCloud
         else end
       end
       # ----------------------------------------
-      # end : auth_token_expired warm up
+      # end : auth_token_expired hook
       # ----------------------------------------
 
       private

@@ -35,10 +35,10 @@ module TinyCloud
     end
 
     def lets_warm_up( action, **options )
-      account.warms_up_for( action ).each do |warm_up|
-        case warm_up.call( **options )
+      account.hooks_for( action ).each do |hook|
+        case hook.call( **options )
         in action_needed: request
-          warm_up.handle(
+          hook.handle(
             response_to **(request.call **options )
           )
         else end
