@@ -16,7 +16,7 @@ describe TinyCloud::Storage do
   end
 
   it "correctly build list request" do
-    @storage.request_processor.account.expect :warms_up_for, [] do |action|
+    @storage.request_processor.account.expect :hooks_for, [] do |action|
       true
     end
     @storage.request_processor.http_client.expect :call, true do |request|
@@ -32,7 +32,7 @@ describe TinyCloud::Storage do
 
   it "correctly build read request" do
     path = 'my_path'
-    @storage.request_processor.account.expect :warms_up_for, [] do |action|
+    @storage.request_processor.account.expect :hooks_for, [] do |action|
       true
     end
     @storage.request_processor.http_client.expect :call, true do |request|
@@ -48,7 +48,7 @@ describe TinyCloud::Storage do
 
   it "correctly build remove request" do
     path = 'my_path'
-    @storage.request_processor.account.expect :warms_up_for, [] do |action|
+    @storage.request_processor.account.expect :hooks_for, [] do |action|
       true
     end
     @storage.request_processor.http_client.expect :call, true do |request|

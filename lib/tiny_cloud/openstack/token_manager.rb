@@ -1,3 +1,5 @@
+require_relative 'auth_token_expired_hook'
+
 module TinyCloud
   module Openstack
     class TokenManager
@@ -9,70 +11,13 @@ module TinyCloud
       def initialize( account )
         @account = account
         @configuration = account.configuration
-        @hooks = [ TinyCloud::Hook.new( :auth_token_expired, self ) ]
-        @auth_token_birth = now -
-          2 * convert_in_seconds( @configuration.auth_token_reset_after )
+        @hooks = [ TinyCloud::Openstack::AuthTokenExpiredHook.new( self ) ]
+        @auth_token_birth = Time.new( 1900 ) # expired !
       end
 
-      # ----------------------------------------
-      # start : auth_token_expired hook
-      # ----------------------------------------
-      def auth_token_expired?( *args, **options )
-        now > auth_token_birth +
-          convert_in_seconds( configuration.auth_token_reset_after )
-      end
-
-      def auth_token_expired_request( *args, **options )
-        {
-          url: token_url,
-          method: :post,
-          options: { headers: renewing_headers, body: renewing_body }
-        }
-      end
-
-      def auth_token_expired_handling( response )
-        # TODO manage response issues..
-        case response
-        in status2xx: response
-          @auth_token = response.headers['x-subject-token']
-          @auth_token_birth = now
-        else end
-      end
-      # ----------------------------------------
-      # end : auth_token_expired hook
-      # ----------------------------------------
-
-      private
-
-      def token_url
-        [ configuration.auth_url, 'auth', 'tokens' ].join '/'
-      end
-
-      def renewing_headers
-        { 'Content-Type' => 'application/json' }
-      end
-
-      def renewing_body
-        {
-          auth: {
-            identity: {
-              methods: ["password"],
-              password: {
-                user: {
-                  domain: { name: configuration.user_domain_name },
-                  name: configuration.user_name,
-                  password: configuration.password
-                }
-              }
-            },
-            scope: {
-              project: {
-                domain: { name: configuration.project_domain_name },
-                name: configuration.project_name
-              }
-            }
-          }
-        }.to_json
+      def set_auth_token( token, time )
+        @auth_token = token
+        @auth_token_birth = time
       end
 
     end
