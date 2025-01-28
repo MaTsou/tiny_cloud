@@ -5,7 +5,6 @@ require_relative 'configuration'
 module TinyCloud
   module Openstack
     class Account
-      include TinyCloud::TimeCalculation
 
       attr_reader :temp_url_manager, :token_manager
 

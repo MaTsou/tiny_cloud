@@ -3,7 +3,6 @@ require_relative 'auth_token_expired_hook'
 module TinyCloud
   module Openstack
     class TokenManager
-      include TinyCloud::TimeCalculation
 
       attr_reader :account, :configuration, :hooks,
         :auth_token_birth, :auth_token
