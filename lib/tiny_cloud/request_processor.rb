@@ -15,34 +15,44 @@ module TinyCloud
       @request_builder = TinyCloud::RequestBuilder.new( @account )
     end
 
-    def method_missing( action, **options )
-      return super unless API.keys.include? action
+    def call( queue )
+      queue.reduce( :unsupported ) do |result, step|
 
-      lets_warm_up( action, **options )
+        case step
+        in hook:, **options
+          execute hook, **options
 
-      response_to( method: API[ action ], **options )
-    end
+        in proc:, **options
+          proc.call **options
 
-    def temp_url( **options )
-      lets_warm_up( :temp_url, **options )
-      account.build_temp_url( **options )
+        in request:
+          the_response_to request
+
+        in requests:
+          # not what I want. I want a permanent connection
+          requests.each do |request|
+            the_response_to request
+          end
+        else end
+      end
     end
 
     private
+
+    def execute( hook, **options )
+      case hook.send( :call, **options )
+      in action_needed: request
+        hook.handle( send( :response_to, **( request.call **options ) ) )
+      else end
+    end
+
+    def the_response_to( request, **options )
+      response_to **request.merge( **options )
+    end
 
     def response_to( **options )
       http_client.call( request_builder.call( **options ) )
     end
 
-    def lets_warm_up( action, **options )
-      account.hooks_for( action ).each do |hook|
-        case hook.call( **options )
-        in action_needed: request
-          hook.handle(
-            response_to **(request.call **options )
-          )
-        else end
-      end
-    end
   end
 end

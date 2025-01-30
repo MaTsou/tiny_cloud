@@ -21,8 +21,8 @@ module TinyCloud
         ]
       end
 
-      def build_temp_url( caller_url:, url:, method:, life_time:, prefix: )
-        builder.call( url:, method:, prefix:, life_time: )
+      def build_temp_url( **options )
+        builder.call **options
       end
 
       def set_keys( keys )

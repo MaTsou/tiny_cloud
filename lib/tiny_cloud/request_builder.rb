@@ -3,8 +3,10 @@ module TinyCloud
 
     attr_reader :account, :request_formatter
 
-    def initialize( account )
-      @account = account
+    # Ne devrait pas avoir besoin de account.
+    # le requête qu'il reçoit devrait contenir tout ce qu'il faut.
+    def initialize( *account )
+      @account = account&.first
       @request_formatter = Struct.new( :url, :method, :options )
     end
 
@@ -12,7 +14,9 @@ module TinyCloud
       case options
       in url:, **rest
         formatted_request(
-          url: url, method: method, options: build_options( rest[:options] )
+          url: [url, rest.delete(:path)].compact.join('/'),
+          method: method,
+          options: build_options( rest[:options] )
         )
       else
         raise KeyError, "A url is needed !"
@@ -24,7 +28,7 @@ module TinyCloud
     def build_options( rest )
       default = { headers: account.header }
       return default unless rest
-      default
+      rest
         .merge( rest&.delete(:headers) || {} )
         .merge( rest || {} )
     end

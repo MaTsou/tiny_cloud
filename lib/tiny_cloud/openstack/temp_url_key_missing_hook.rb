@@ -11,13 +11,14 @@ module TinyCloud
       Key = Struct.new( :id, :header, :value, :birth_date )
 
       def needed?( *args, **options )
+        return false unless options[:type] == :container
         !keys
       end
 
       def request( *args, **options )
         {
-          url: options[:caller_url],
-          method: :get
+          url: options[:url],
+          method: :get,
         }
       end
 
@@ -25,8 +26,8 @@ module TinyCloud
         case response
         in status2xx: response
           set_keys( extract_keys_from response )
+          push_key_to_builder
         else end
-        push_key_to_builder
       end
 
       private

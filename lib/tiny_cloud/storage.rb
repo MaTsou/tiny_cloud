@@ -1,58 +1,26 @@
 module TinyCloud
   class Storage
-    attr_accessor :url, :request_processor, :type
+    attr_accessor :account, :url, :request_processor, :type
 
-    def initialize( url: nil, request_processor: nil, type: :storage )
-      @url = url
-      @request_processor = request_processor
+    def initialize( type = :storage )
       @type = type
-      yield self if block_given?
+      yield self
     end
 
     def call( sub_storage_name )
-      return unless type == :storage #  a single nested storage (container)
-      self.class.new(
-        url: join_paths( url, sub_storage_name ),
-        request_processor:,
-        type: :container
-      )
+      return unless type == :storage #  a single nested storage level (container)
+      self.class.new( :container ) do |container|
+        container.account = account
+        container.url = join_paths( url, sub_storage_name )
+        container.request_processor = request_processor
+      end
     end
 
-    def list
-      request_processor.read url: url
-    end
-
-    # add( single_path, single_object )
-    # TODO add this syntax
-    # add( [ first_path, first_object ], [ second_path, second_object ] )
-    def add( path, object = nil )
-      request_processor.write url: join_paths( url, path ), body: object
-    end
-
-    # remove( single_path, single_object )
-    # TODO add this syntax
-    # remove( [ first_path, first_object ], [ second_path, second_object ] )
-    def remove( path )
-      request_processor.erase url: join_paths( url, path )
-    end
-
-    # read( single_path, single_object )
-    # TODO add this syntax
-    # adread [ first_path, first_object ], [ second_path, second_object ] )
-    def read( path )
-      request_processor.read url: join_paths( url, path )
-    end
-
-    def temp_url( path, method:, life_time: nil, prefix: nil )
-      # may be an Openstack only thing ?!
-      return :unsupported unless type == :container
-      request_processor.temp_url(
-        caller_url: url,
-        url: join_paths( url, path ),
-        method: method,
-        life_time: life_time,
-        prefix: prefix
-      )
+    # delegation :
+    # to account : building operation queues to be performed
+    # to request_processor : to perform the queue
+    def method_missing( name, **options )
+      request_processor.call account.queue_for( name, self, **options )
     end
 
     private

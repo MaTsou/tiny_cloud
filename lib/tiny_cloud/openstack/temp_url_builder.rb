@@ -9,11 +9,14 @@ module TinyCloud
         @default_life_time = configuration.temp_url_default_life_time
       end
 
-      def call( url:, method:, life_time:, prefix: )
-        @url, @method, @prefix = url, method, prefix
+      def call( url:, method:, path: nil, life_time: nil, prefix: nil, **rest )
+        return :unsupported if rest[:type] == :storage
+
+        @url = [ url, path ].compact.join('/')
+        @method, @prefix = method, prefix
         @life_time = life_time || default_life_time
 
-        return "#{url}?#{query_args}" unless prefix
+        return "#{@url}?#{query_args}" unless prefix
         -> (path) { "#{url}#{path}?#{query_args}" }
       end
 
