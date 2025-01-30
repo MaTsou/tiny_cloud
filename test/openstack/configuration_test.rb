@@ -27,6 +27,7 @@ describe TinyCloud::Openstack do
     end
 
     @storage = TinyCloud::Storage.new do |storage|
+      storage.account = @auth
       storage.url = STORAGE_URL
       storage.request_processor = TinyCloud::RequestProcessor.new do |config|
         config.account = @auth
