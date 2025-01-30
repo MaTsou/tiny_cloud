@@ -10,8 +10,6 @@ module TinyCloud
       end
 
       def call( url:, method:, path: nil, life_time: nil, prefix: nil, **rest )
-        return :unsupported if rest[:type] == :storage
-
         @url = [ url, path ].compact.join('/')
         @method, @prefix = method, prefix
         @life_time = life_time || default_life_time

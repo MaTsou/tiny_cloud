@@ -11,7 +11,6 @@ module TinyCloud
       Key = Struct.new( :id, :header, :value, :birth_date )
 
       def needed?( *args, **options )
-        return false unless options[:type] == :container
         !keys
       end
 

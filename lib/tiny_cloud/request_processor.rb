@@ -1,6 +1,6 @@
 module TinyCloud
   class RequestProcessor
-    attr_accessor :http_client, :request_builder
+    attr_accessor :http_client
 
     def initialize( http_client: nil )
       @http_client = http_client
@@ -22,7 +22,9 @@ module TinyCloud
 
         in requests:
           :to_be_implemented# TODO
-        else end
+        else
+          step
+        end
       end
     end
 

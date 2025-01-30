@@ -7,7 +7,7 @@ module TinyCloud
   module Openstack
     class Account
 
-      attr_reader :temp_url_manager, :token_manager, :request
+      attr_reader :temp_url_manager, :token_manager
 
       def initialize
         yield configuration

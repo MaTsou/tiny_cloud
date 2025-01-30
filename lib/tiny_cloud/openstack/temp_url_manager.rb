@@ -30,6 +30,8 @@ module TinyCloud
       end
 
       def enqueue_building( **context )
+        return [ :unsupported ] unless context[:type] == :container
+
         enqueue_hooks( **context ).concat(
           [
             proc: -> (**options) { build_temp_url( **options ) }, **context
