@@ -1,38 +1,27 @@
 module TinyCloud
   class RequestProcessor
-    API = {
-      read: :get,
-      write: :put,
-      erase: :delete
-    }
+    attr_accessor :http_client, :request_builder
 
-    attr_accessor :http_client, :account, :request_builder
-
-    def initialize( http_client: nil, account: nil )
+    def initialize( http_client: nil )
       @http_client = http_client
-      @account = account
       yield self if block_given?
-      @request_builder = TinyCloud::RequestBuilder.new( @account )
     end
 
     def call( queue )
       queue.reduce( :unsupported ) do |result, step|
 
         case step
-        in hook:, **options
-          execute hook, **options
+        in hook:, **context
+          execute hook, **context
 
-        in proc:, **options
-          proc.call **options
+        in proc:, **context
+          proc.call **context
 
-        in request:
-          the_response_to request
+        in request:, **context
+          response_to request, **context
 
         in requests:
-          # not what I want. I want a permanent connection
-          requests.each do |request|
-            the_response_to request
-          end
+          :to_be_implemented# TODO
         else end
       end
     end
@@ -40,18 +29,14 @@ module TinyCloud
     private
 
     def execute( hook, **options )
-      case hook.send( :call, **options )
-      in action_needed: request
-        hook.handle( send( :response_to, **( request.call **options ) ) )
+      case hook.call( **options )
+      in action_needed: request, **options
+        hook.handle response_to( request, **options )
       else end
     end
 
-    def the_response_to( request, **options )
-      response_to **request.merge( **options )
-    end
-
-    def response_to( **options )
-      http_client.call( request_builder.call( **options ) )
+    def response_to( request, **options )
+      http_client.call request.call( **options )
     end
 
   end

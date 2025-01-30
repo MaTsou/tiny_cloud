@@ -15,11 +15,12 @@ module TinyCloud
         !keys
       end
 
-      def request( *args, **options )
-        {
-          url: options[:url],
-          method: :get,
-        }
+      def request( **options )
+          {
+            url: options[:url],
+            method: :get,
+            options: { headers: holder.account.header }
+          }
       end
 
       def handle( response )

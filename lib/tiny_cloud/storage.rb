@@ -19,8 +19,8 @@ module TinyCloud
     # delegation :
     # to account : building operation queues to be performed
     # to request_processor : to perform the queue
-    def method_missing( name, **options )
-      request_processor.call account.queue_for( name, self, **options )
+    def method_missing( action, **options )
+      request_processor.call account.queue_for( action, self, **options )
     end
 
     private

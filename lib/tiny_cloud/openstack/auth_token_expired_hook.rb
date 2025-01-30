@@ -3,17 +3,17 @@ module TinyCloud
     class AuthTokenExpiredHook < TinyCloud::Hook
       include TinyCloud::TimeCalculation
 
-      def needed?( *args, **options )
+      def needed?( **options )
         now > auth_token_birth +
           convert_in_seconds( configuration.auth_token_reset_after )
       end
 
-      def request( *args, **options )
-        {
-          url: token_url,
-          method: :post,
-          options: { headers: renewing_headers, body: renewing_body }
-        }
+      def request( **options )
+          {
+            url: token_url,
+            method: :post,
+            options: { headers: renewing_headers, body: renewing_body }
+          }
       end
 
       def handle( response )

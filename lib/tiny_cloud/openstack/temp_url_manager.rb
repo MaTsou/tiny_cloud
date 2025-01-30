@@ -29,6 +29,14 @@ module TinyCloud
         @keys = keys
       end
 
+      def enqueue_building( **context )
+        enqueue_hooks( **context ).concat(
+          [
+            proc: -> (**options) { build_temp_url( **options ) }, **context
+          ]
+        )
+      end
+
       private
 
       def push_key_to_builder
