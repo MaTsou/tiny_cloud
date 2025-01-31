@@ -12,10 +12,7 @@ module TinyCloud
         yield configuration
         @temp_url_manager = Openstack::TempUrlManager.new( self )
         @token_manager = Openstack::TokenManager.new( self )
-        @request_processor = request_processor || 
-          TinyCloud::RequestProcessor.new do |rq|
-            rq.http_client = TinyCloud::Excon::HttpClient.new
-          end
+        @request_processor = request_processor || TinyCloud::RequestProcessor.new
       end
 
       def configuration

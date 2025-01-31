@@ -3,7 +3,7 @@ module TinyCloud
     attr_accessor :http_client
 
     def initialize( http_client: nil )
-      @http_client = http_client
+      @http_client = http_client || TinyCloud::Excon::HttpClient.new
       yield self if block_given?
     end
 
