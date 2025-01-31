@@ -25,14 +25,14 @@ module TinyCloud
     private
 
     def execute( hook, **options )
-      case hook.call( **options )
+      case hook.call(**options)
       in action_needed: request, **options
         hook.handle response_to( request, **options )
       else end
     end
 
     def response_to( request, **options )
-      http_client.call request.call( **options )
+      http_client.call request.call(**options)
     end
 
   end

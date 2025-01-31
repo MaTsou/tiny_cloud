@@ -9,7 +9,7 @@ module TinyCloud
     end
 
     def call( **options )
-      formatted_request **@block.call( **options )
+      formatted_request(**@block.call(**options))
     end
 
     def formatted_request( **context )

@@ -4,9 +4,11 @@ module TinyCloud
 
     def initialize( holder )
       @holder = holder
-      holder.define_singleton_method :enqueue_hooks do |**context|
-        hooks.map do |hook|
-          { hook: hook, **context }
+      unless holder.respond_to? :enqueue_hooks
+        holder.define_singleton_method :enqueue_hooks do
+          hooks.map do |hook|
+            { hook: hook }
+          end
         end
       end
     end
@@ -20,7 +22,7 @@ module TinyCloud
 
     def the_request
       TinyCloud::Request.new do |**context|
-        request **context
+        request(**context)
       end
     end
 
