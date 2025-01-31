@@ -1,11 +1,9 @@
 module TinyCloud
   module Openstack
     class AuthTokenExpiredHook < TinyCloud::Hook
-      include TinyCloud::TimeCalculation
 
       def needed?( **options )
-        now > auth_token_birth +
-          convert_in_seconds( configuration.auth_token_reset_after )
+        now > auth_token_reset_time
       end
 
       def request( **options )
@@ -19,7 +17,7 @@ module TinyCloud
       def handle( response )
         case response
         in status2xx: response
-          set_auth_token response.headers['x-subject-token'], now
+          set_auth_token response.headers['x-subject-token'], expiry( response )
         in status4xx: response
           # todo to be sent to logger..
           p "Auth Token setting unauthorize error : #{response}"
@@ -27,6 +25,12 @@ module TinyCloud
       end
 
       private
+
+      def expiry( response )
+        Time
+          .new( JSON.parse(response.body)['token']['expires_at'] )
+          .getlocal
+      end
 
       def token_url
         [ configuration.auth_url, 'auth', 'tokens' ].join '/'

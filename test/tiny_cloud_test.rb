@@ -6,6 +6,7 @@ describe TinyCloud::Storage do
 
   URL = 'https://my_storage_url'
   AUTH_TOKEN = 'My wonderful auth token'
+  AUTH_TOKEN_EXPIRES_AT = Time.new( 2021, 10, 27, 12, 05, 07 )
 
   before do
     @account = TinyCloud::Openstack::Account.new do |config|
@@ -21,7 +22,6 @@ describe TinyCloud::Storage do
       config.password = 'My_wonderful_and_unbreakable_pwv'
       config.temp_url_default_life_time = 300
       config.temp_url_key_reset_after = { days: 30 }
-      config.auth_token_reset_after = { days: 30 }
     end
 
     @configuration = @account.configuration
@@ -35,7 +35,11 @@ describe TinyCloud::Storage do
 
     Excon.stub(
       { url: @auth_url, method: :post },
-      { status: 200, headers: { 'x-subject-token' => AUTH_TOKEN } }
+      {
+        status: 200,
+        headers: { 'x-subject-token' => AUTH_TOKEN },
+        body: { token: { expires_at: AUTH_TOKEN_EXPIRES_AT.to_s } }.to_json
+      }
     )
 
   end
@@ -43,7 +47,9 @@ describe TinyCloud::Storage do
   it "correctly set auth_token" do
     Excon.stub( { method: :get }, {} )
     @storage.list
-    _( @account.token_manager.auth_token ).must_equal AUTH_TOKEN
+    resulting = @account.token_manager
+    _( resulting.auth_token ).must_equal AUTH_TOKEN
+    _( resulting.auth_token_expires_at ).must_equal AUTH_TOKEN_EXPIRES_AT
   end
 
   it "correctly build list request" do
