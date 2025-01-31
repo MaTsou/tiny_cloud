@@ -18,7 +18,7 @@ module TinyCloud
           {
             url: options[:url],
             method: :get,
-            options: { headers: holder.account.header }
+            options: { headers: account.header }
           }
       end
 
