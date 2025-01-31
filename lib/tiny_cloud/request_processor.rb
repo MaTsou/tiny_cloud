@@ -7,24 +7,18 @@ module TinyCloud
       yield self if block_given?
     end
 
-    def call( queue )
-      queue.reduce( :unsupported ) do |result, step|
+    def call( step )
+      case step
+      in hook:, **context
+        execute hook, **context
 
-        case step
-        in hook:, **context
-          execute hook, **context
+      in request:, **context
+        response_to request, **context
 
-        in proc:, **context
-          proc.call **context
-
-        in request:, **context
-          response_to request, **context
-
-        in requests:
-          :to_be_implemented# TODO
-        else
-          step
-        end
+      in requests:
+        :to_be_implemented# TODO
+      else
+        step
       end
     end
 

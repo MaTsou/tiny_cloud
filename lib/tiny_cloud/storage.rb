@@ -1,6 +1,6 @@
 module TinyCloud
   class Storage
-    attr_accessor :account, :url, :request_processor, :type
+    attr_accessor :account, :url, :type
 
     def initialize( type = :storage )
       @type = type
@@ -12,15 +12,12 @@ module TinyCloud
       self.class.new( :container ) do |container|
         container.account = account
         container.url = join_paths( url, sub_storage_name )
-        container.request_processor = request_processor
       end
     end
 
-    # delegation :
-    # to account : building operation queues to be performed
-    # to request_processor : to perform the queue
+    # delegation to account : building operation queues to be performed
     def method_missing( action, **options )
-      request_processor.call account.queue_for( action, self, **options )
+      account.call( action, self, **options )
     end
 
     private

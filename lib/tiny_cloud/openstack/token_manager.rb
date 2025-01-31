@@ -19,6 +19,9 @@ module TinyCloud
         @auth_token_birth = time
       end
 
+      def hooks_for( action )
+        enqueue_hooks
+      end
     end
   end
 end

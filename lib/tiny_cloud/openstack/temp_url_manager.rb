@@ -21,25 +21,25 @@ module TinyCloud
         ]
       end
 
-      def build_temp_url( **options )
-        builder.call **options
+      def build_temp_url( **context )
+        return :unsupported unless supported?( **context )
+        builder.call(**context)
       end
 
       def set_keys( keys )
         @keys = keys
       end
 
-      def enqueue_building( **context )
-        return [ :unsupported ] unless context[:type] == :container
-
-        enqueue_hooks( **context ).concat(
-          [
-            proc: -> (**options) { build_temp_url( **options ) }, **context
-          ]
-        )
+      def hooks_for( action, **context )
+        return nil unless action == :temp_url
+        enqueue_hooks if supported?( **context )
       end
 
       private
+
+      def supported?( **context )
+        context[:type] == :container
+      end
 
       def push_key_to_builder
         builder.set_active_key keys[:active].value
