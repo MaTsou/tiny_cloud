@@ -47,9 +47,11 @@ describe TinyCloud::Storage do
     end
 
     it "delegates methods to account" do
-      options = { url: 'my_url', path: 'my_path', method: 'get' }
-      @storage.account.expect :call, true do |action, storage, **args|
-        args == options && storage == @storage
+      options = { path: 'my_path', method: 'get' }
+      @storage.account.expect :call, true do |action, context|
+        context.type == @storage.type &&
+        context.url == @storage.url &&
+        options.all? { |k,v| context[k] == v }
       end
       @storage.list( **options )
       @storage.account.verify

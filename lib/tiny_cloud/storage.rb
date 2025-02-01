@@ -17,7 +17,10 @@ module TinyCloud
 
     # delegation to account : building operation queues to be performed
     def method_missing( action, **options )
-      account.call( action, self, **options )
+      account.call(
+        action,
+        Ustruct.new( options, url: self.url, type: self.type )
+      )
     end
 
     private

@@ -1,6 +1,10 @@
-require_relative 'token_manager'
-require_relative 'temp_url_manager'
-require_relative 'configuration'
+%w( token_manager temp_url_manager configuration ).each do |f|
+  require_relative f
+end
+
+%w( list read ).each do |f|
+  require_relative f
+end
 
 module TinyCloud
   module Openstack
@@ -19,33 +23,38 @@ module TinyCloud
         @configuration ||= Openstack::Configuration.new
       end
 
-      def call( action, storage, **options )
-        context = options.merge( url: storage.url, type: storage.type )
-        token_manager.hooks_for( action ).each do |hook|
-          request_processor.call( hook.merge context )
+      def call( action, context )
+        context = context.to_hash
+        queue = token_manager.hooks_for( action )
+
+        queue.concat step_for( action, **context )
+
+        queue.compact.reduce( :unsupported ) do |*, hook|
+          case hook
+          in result:
+            result.respond_to?(:call) ? result.call(**context) : result
+          else
+            request_processor.call( hook, context )
+          end
         end
-        temp_url_manager.hooks_for( action, **context )&.each do |hook|
-          request_processor.call( hook.merge context )
-        end
-        request_processor.call( step_for( action ).call( **context ) )
       end
 
       def header
         { 'X-Auth-Token' => token_manager.auth_token }
       end
 
-      def step_for( action )
+      def step_for( action, **context )
         case action
         when :list, :add, :remove, :read
-          -> (**context) {
-            {  request: TinyCloud::Request.new do
-              { options: { headers: header } }.merge(
-                { url: context[:url], path: context[:path], method: :get }.compact
-              )
-            end }
-          }
+          [
+            Object.const_get(
+              [ "TinyCloud::Openstack",
+                action.to_s.split('_').map(&:capitalize).join
+              ].join('::')
+            ).new( self )
+          ]
         when :temp_url
-          -> ( **context ) { temp_url_manager.build_temp_url( **context ) }
+          temp_url_manager.hooks_for( action, **context )
         end
       end
 

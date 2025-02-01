@@ -31,8 +31,9 @@ module TinyCloud
       end
 
       def hooks_for( action, **context )
-        return nil unless action == :temp_url
-        enqueue_hooks if supported?( **context )
+        return [] unless action == :temp_url
+        res = supported?( **context ) ? hooks : []
+        res << { result: -> (**options) { self.send(:build_temp_url, **options) } }
       end
 
       private

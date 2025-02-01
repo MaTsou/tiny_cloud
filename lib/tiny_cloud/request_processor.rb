@@ -7,28 +7,19 @@ module TinyCloud
       yield self if block_given?
     end
 
-    def call( step )
-      case step
-      in hook:, **context
-        execute hook, **context
-
-      in request:, **context
-        response_to request, **context
-
-      in requests:
-        :to_be_implemented# TODO
-      else
-        step
-      end
+    def call( step, context )
+      execute step, **context
     end
 
     private
 
     def execute( hook, **options )
-      case hook.call(**options)
-      in action_needed: request, **options
+      case res = hook.call(**options)
+      in action_needed: request
         hook.handle response_to( request, **options )
-      else end
+      else
+      res
+      end
     end
 
     def response_to( request, **options )

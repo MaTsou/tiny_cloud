@@ -22,7 +22,7 @@ module TinyCloud
       end
 
       def hooks_for( action )
-        enqueue_hooks
+        hooks.dup
       end
 
       def auth_token_reset_time
