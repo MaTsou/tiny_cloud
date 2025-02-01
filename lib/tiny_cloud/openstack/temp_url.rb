@@ -1,20 +1,25 @@
 module TinyCloud
   module Openstack
-    class TempUrlBuilder
+    class TempUrl < TinyCloud::Hook
       attr_reader :root_url, :default_life_time, :active_key,
         :url, :method, :life_time, :prefix
 
-      def initialize( configuration )
+      def initialize( holder, request_processor )
+        super
         @root_url = configuration.root_url
         @default_life_time = configuration.temp_url_default_life_time
       end
 
-      def call( url:, method:, path: nil, life_time: nil, prefix: nil, **rest )
-        @url = [ url, path ].compact.join('/')
-        @method, @prefix = method, prefix
-        @life_time = life_time || default_life_time
+      def supported?
+        context[:type] == :container
+      end
 
-        return "#{@url}?#{query_args}" unless prefix
+      def request
+        @url = [ context[:url], context[:path] ].compact.join('/')
+        @method, @prefix = context[:method], context[:prefix]
+        @life_time = context[:life_time] || default_life_time
+
+        return [ url, query_args ].join('?') unless prefix
         -> (path) { "#{url}#{path}?#{query_args}" }
       end
 
@@ -26,9 +31,14 @@ module TinyCloud
 
       def query_args
         [
-          "temp_url_sig=#{sig}&temp_url_expires=#{expires}",
-          ( "&temp_url_prefix=#{prefix}" if prefix )
-        ].compact.join
+          "temp_url_sig=#{sig}",
+          "temp_url_expires=#{expires}",
+          query_prefix
+        ].compact.join('&')
+      end
+
+      def query_prefix
+        "&temp_url_prefix=#{prefix}" if prefix
       end
 
       def expires

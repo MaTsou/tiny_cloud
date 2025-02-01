@@ -3,27 +3,26 @@ module TinyCloud
 
     attr_reader :request_formatter
 
-    def initialize( &block )
-      @block = block
+    def initialize
       @request_formatter = Struct.new( :url, :method, :options )
     end
 
-    def call( **options )
-      formatted_request(**@block.call(**options))
+    def call( request )
+      formatted_request( request )
     end
 
-    def formatted_request( **context )
+    def formatted_request( request )
       request_formatter.new(
-        get_url( context ),
-        context[:method],
-        context[:options]
+        get_url( request ),
+        request[:method],
+        request[:options]
       )
     end
 
     private
 
-    def get_url( context )
-      join_paths context[:url], context[:path]
+    def get_url( request )
+      join_paths request[:url], request[:path]
     end
 
     def join_paths( *paths )

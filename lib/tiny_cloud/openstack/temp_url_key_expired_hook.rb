@@ -1,12 +1,12 @@
 module TinyCloud
   module Openstack
     class TempUrlKeyExpiredHook < TinyCloud::Hook
-      def needed?( *args, **options )
+      def needed?
         return false # temporary
         death_date( keys[:active] ) < tomorrow
       end
 
-      def request( *args, **options )
+      def request
       end
 
       def handle( response )

@@ -1,22 +1,27 @@
 module TinyCloud
   class Hook
-    attr_reader :holder
+    attr_reader :holder, :request_processor, :context
 
-    def initialize( holder )
+    def initialize( holder, request_processor )
       @holder = holder
+      @request_processor = request_processor
     end
 
-    def needed?( **options )
+    def supported?
       true
     end
 
-    def call( **options )
-      return true unless needed?( **options )
-      {
-        action_needed: TinyCloud::Request.new do |**context|
-          request(**context)
-        end
-      }
+    def needed?
+      true
+    end
+
+    def call( *before_hooks, **options )
+      @context = options
+      return :unsupported unless supported?
+
+      before_hooks.pop&.call( *before_hooks, **options )
+
+      handle( request ) if needed?
     end
 
     def handle( response )

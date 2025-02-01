@@ -2,16 +2,18 @@ module TinyCloud
   module Openstack
     class AuthTokenExpiredHook < TinyCloud::Hook
 
-      def needed?( **options )
+      def needed?
         now > auth_token_reset_time
       end
 
-      def request( **options )
+      def request
+        request_processor.call(
           {
             url: token_url,
             method: :post,
             options: { headers: renewing_headers, body: renewing_body }
           }
+        )
       end
 
       def handle( response )

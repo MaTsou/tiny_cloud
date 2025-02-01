@@ -1,7 +1,6 @@
 module TinyCloud
   module Openstack
     class TempUrlKeyMissingHook < TinyCloud::Hook
-      # Maybe a TukHook super class cloud be needed to store all common stuff.
 
       HEADER_NAMES = {
         first: "X-Container-Meta-Temp-URL-Key",
@@ -10,16 +9,18 @@ module TinyCloud
 
       Key = Struct.new( :id, :header, :value, :birth_date )
 
-      def needed?( *args, **options )
+      def needed?
         !keys
       end
 
-      def request( **options )
+      def request
+        request_processor.call(
           {
-            url: options[:url],
+            url: context[:url],
             method: :get,
             options: { headers: account.header }
           }
+        )
       end
 
       def handle( response )
