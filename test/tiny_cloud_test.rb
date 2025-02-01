@@ -7,6 +7,8 @@ describe TinyCloud::Storage do
   URL = 'https://my_storage_url'
   AUTH_TOKEN = 'My wonderful auth token'
   AUTH_TOKEN_EXPIRES_AT = Time.new( 2021, 10, 27, 12, 05, 07 )
+  TUK = 'My first temp url key'
+  TUK2 = 'My second temp url key'
 
   before do
     @account = TinyCloud::Openstack::Account.new do |config|
@@ -74,23 +76,39 @@ describe TinyCloud::Storage do
     @storage.remove path
   end
 
-  it "correctly hook temp_url requests" do
-    @container = @storage.call( 'container' )
-    path = 'john'
-    url = [ @container.url, path ].join('/')
-    method = :get
+  describe :temp_url do
+    before do
+      @container = @storage.call( 'container' )
+      @path = 'john'
+      @url = [ @container.url, @path ].join('/')
+      @method = :get
 
-    Excon.stub(
-      { url: @container.url, method: method },
-      {
-        status: 200,
-        headers: {
-          'X-Container-Meta-Temp-Url-Key' => 'active',
-          'X-Container-Meta-Temp-Url-Key-2' => 'inactive',
+      Excon.stub(
+        { url: @container.url, method: @method },
+        {
+          status: 200,
+          headers: {
+            'X-Container-Meta-Temp-Url-Key' => TUK,
+            'X-Container-Meta-Temp-Url-Key-2' => TUK2,
+          }
         }
-      }
-    )
-    @storage.call( 'container' ).temp_url( path:, method: )
-    _( @account.temp_url_manager.keys[:active].value ).must_equal 'active'
+      )
+    end
+
+    it "correctly hooks temp_url requests" do
+      @storage.call( 'container' ).temp_url( path: @path, method: @method )
+      keys = @account.temp_url_manager.keys
+
+      _( keys.keys ).must_equal [ :active, :other ]
+      _( keys.values.map(&:value) ).must_equal [ TUK, TUK2 ]
+    end
+
+    it "correctly build temp_url" do
+      res = @storage.call( 'container' ).temp_url( path: @path, method: @method )
+      _( res.split('?').first ).must_equal @url
+
+      req_params = res.split('?').last.split('&').map { |r| r.split('=').first }
+      _( req_params ).must_include *[ 'temp_url_sig', 'temp_url_expires' ]
+    end
   end
 end
