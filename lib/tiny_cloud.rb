@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'ustruct'
 require_relative "tiny_cloud/version"
 require_relative "tiny_cloud/storage"
 require_relative "tiny_cloud/time_calculation"
