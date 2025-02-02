@@ -9,12 +9,11 @@ end
 module TinyCloud
   module Openstack
     class Account
-      attr_reader :temp_url_manager, :token_manager, :request_processor, :actions
+      attr_reader :temp_url_manager, :token_manager, :request_processor
 
       def initialize( request_processor = TinyCloud::RequestProcessor.new )
         yield configuration
         @request_processor = request_processor
-        @actions = {}
         @temp_url_manager = Openstack::TempUrlManager.new(
           reset_key_after: configuration.temp_url_key_reset_after
         )
@@ -36,19 +35,7 @@ module TinyCloud
       private
 
       def action( action )
-        actions[ action ] ||= set_action( action )
-      end
-
-      def set_action( action )
-        Object.const_get( get_hook_for action ).new
-      end
-
-      def get_hook_for( action )
-        [ "TinyCloud::Openstack", suffix( action ) ].join('::')
-      end
-
-      def suffix( action )
-        action.to_s.split('_').map(&:capitalize).join
+        Action.registered_actions( action )
       end
     end
   end

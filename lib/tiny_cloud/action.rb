@@ -2,13 +2,23 @@ module TinyCloud
   class Action < Module
 
     def self.inherited( klass )
+      self.instance_eval do
+        @@actions ||= {}
+        @@actions[ to_snake klass ] ||= klass.new
+      end
+
       klass.instance_eval do
         include ActionBase
 
-        def register( name, object )
+        def register_hook( name, object )
           @@hooks ||= {}
           @@hooks[name] ||= object.new
         end
+
+        def registered_actions( action )
+          @@actions[ action ]
+        end
+
       end
 
       klass.class_eval do
@@ -18,6 +28,16 @@ module TinyCloud
       end
     end
 
+    def self.to_action( str )
+      str.to_s.split('::').last
+    end
+
+    def self.to_snake( str )
+      to_action( str )
+        .gsub( /([a-z]+)([A-Z])/, '\1_\2' )
+        .downcase
+        .to_sym
+    end
   end
 
   module CommonHook
