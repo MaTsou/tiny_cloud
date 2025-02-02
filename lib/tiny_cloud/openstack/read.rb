@@ -1,10 +1,9 @@
 module TinyCloud
   module Openstack
-    class Read < TinyCloud::Hook
-      include ActionHook, Hooks
+    class Read < Openstack::Action
 
       def before_hooks
-        chain( Hooks[:auth_token_expired] )
+        [ registered_hooks[:auth_token_expiry] ]
       end
 
       def request

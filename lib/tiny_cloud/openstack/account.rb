@@ -1,4 +1,4 @@
-%w( token_manager temp_url_manager configuration hooks_manager ).each do |f|
+%w( token_manager temp_url_manager configuration action ).each do |f|
   require_relative f
 end
 

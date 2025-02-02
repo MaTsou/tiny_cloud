@@ -1,16 +1,15 @@
 module TinyCloud
   module Openstack
-    class TempUrl < TinyCloud::Hook
-      include ActionHook, Hooks
+    class TempUrl < Openstack::Action
 
       attr_reader :root_url, :url, :prefix, :life_time, :default_life_time
 
       def before_hooks
-        chain(
-          Hooks[:auth_token_expired],
-          Hooks[:temp_url_key_missing],
-          Hooks[:temp_url_key_expired]
-        )
+        [
+          registered_hooks[:auth_token_expiry],
+          registered_hooks[:temp_url_key_missing],
+          registered_hooks[:temp_url_key_expiry],
+        ]
       end
 
       def supported?
