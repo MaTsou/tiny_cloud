@@ -108,7 +108,7 @@ describe TinyCloud::Storage do
       _( res.split('?').first ).must_equal @url
 
       req_params = res.split('?').last.split('&').map { |r| r.split('=').first }
-      _( req_params ).must_include *[ 'temp_url_sig', 'temp_url_expires' ]
+      _( req_params ).must_include(*[ 'temp_url_sig', 'temp_url_expires' ])
     end
   end
 end
