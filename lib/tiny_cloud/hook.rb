@@ -15,11 +15,11 @@ module TinyCloud
       true
     end
 
-    def call( *before_hooks, **options )
-      @context = options
+    def call( *before_hooks, context )
+      @context = context
       return :unsupported unless supported?
 
-      before_hooks.pop&.call( *before_hooks, **options )
+      before_hooks.pop&.call( *before_hooks, context )
 
       handle( request ) if needed?
     end

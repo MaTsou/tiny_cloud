@@ -25,7 +25,7 @@ module TinyCloud
 
       def call( action_called, context )
         action( action_called )
-          .call *hooks_for( action_called ), **context.to_hash
+          .call(*hooks_for( action_called ), context )
       end
 
       def header

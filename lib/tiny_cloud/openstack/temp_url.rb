@@ -2,7 +2,7 @@ module TinyCloud
   module Openstack
     class TempUrl < TinyCloud::Hook
       attr_reader :root_url, :default_life_time, :active_key,
-        :url, :method, :life_time, :prefix
+        :url, :life_time, :prefix
 
       def initialize( holder, request_processor )
         super
@@ -11,13 +11,13 @@ module TinyCloud
       end
 
       def supported?
-        context[:type] == :container
+        context.type == :container
       end
 
       def request
-        @url = [ context[:url], context[:path] ].compact.join('/')
-        @method, @prefix = context[:method], context[:prefix]
-        @life_time = context[:life_time] || default_life_time
+        @url = [ context.url, context.path ].compact.join('/')
+        @prefix = context.prefix
+        @life_time = context.life_time || default_life_time
 
         return [ url, query_args ].join('?') unless prefix
         -> (path) { "#{url}#{path}?#{query_args}" }
@@ -51,7 +51,7 @@ module TinyCloud
       end
 
       def my_data
-        "#{method.to_s.upcase}\n#{expires}\n#{path}"
+        "#{context.method.to_s.upcase}\n#{expires}\n#{path}"
       end
 
       def path
