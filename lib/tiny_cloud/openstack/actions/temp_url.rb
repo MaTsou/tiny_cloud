@@ -25,11 +25,11 @@ module TinyCloud
         -> (path) { "#{url}#{path}?#{query_args}" }
       end
 
+      private
+
       def active_key
         temp_url_manager.active_key
       end
-
-      private
 
       def query_args
         [
