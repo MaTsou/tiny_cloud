@@ -2,10 +2,9 @@ module TinyCloud
   class RequestProcessor
     attr_accessor :http_client, :request_formatter
 
-    def initialize( http_client: nil )
-      @http_client = http_client || TinyCloud::Excon::HttpClient.new
+    def initialize( http_client: TinyCloud::Excon::HttpClient.new )
+      @http_client = http_client
       @request_formatter = TinyCloud::Request.new
-      yield self if block_given?
     end
 
     def call( request )
