@@ -12,12 +12,12 @@ module TinyCloud
       def initialize( account )
         @account = account
         @configuration = account.configuration
-        @hooks = [
-          TinyCloud::Openstack::AuthTokenExpiredHook.new(
-            self, account.request_processor
-          )
-        ]
+        @hooks = [ TinyCloud::Openstack::AuthTokenExpiredHook.new ]
         @auth_token_expires_at = Time.new( 1900 ) # expired !
+      end
+
+      def token_expired?
+        now > auth_token_reset_time
       end
 
       def set_auth_token( token, time )

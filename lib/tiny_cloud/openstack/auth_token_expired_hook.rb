@@ -3,7 +3,7 @@ module TinyCloud
     class AuthTokenExpiredHook < TinyCloud::Hook
 
       def needed?
-        now > auth_token_reset_time
+        token_manager.token_expired?
       end
 
       def request
@@ -19,7 +19,9 @@ module TinyCloud
       def handle( response )
         case response
         in status2xx: response
-          set_auth_token response.headers['x-subject-token'], expiry( response )
+          token_manager.set_auth_token(
+            response.headers['x-subject-token'], expiry( response )
+          )
         in status4xx: response
           # todo to be sent to logger..
           p "Auth Token setting unauthorize error : #{response}"

@@ -3,7 +3,7 @@ module TinyCloud
     class TempUrlKeyExpiredHook < TinyCloud::Hook
       def needed?
         return false # temporary
-        death_date( keys[:active] ) < tomorrow
+        temp_url_manager.keys_expired?
       end
 
       def request
@@ -15,7 +15,7 @@ module TinyCloud
           JSON.parse response.body
         else end # FIXME server error managment needed..
         # TODO to be continued
-        push_key_to_builder
+        temp_url_manager.update_keys#push_key_to_builder
       end
     end
   end

@@ -13,21 +13,25 @@ module TinyCloud
         @account = account
         @reset_key_after = account.configuration.temp_url_key_reset_after
         @hooks = [
-          TinyCloud::Openstack::TempUrlKeyMissingHook.new(
-            self, account.request_processor
-          ),
-          TinyCloud::Openstack::TempUrlKeyExpiredHook.new(
-            self, account.request_processor
-          ),
+          TinyCloud::Openstack::TempUrlKeyMissingHook.new,
+          TinyCloud::Openstack::TempUrlKeyExpiredHook.new
         ]
+      end
+
+      def keys_missing?
+        !keys
+      end
+
+      def keys_expired?
+        death_date( keys[:active] ) < tomorrow
       end
 
       def set_keys( keys )
         @keys = keys
+        push_key_to_builder
       end
 
       private
-
 
       def push_key_to_builder
         account.set_active_key keys[:active].value

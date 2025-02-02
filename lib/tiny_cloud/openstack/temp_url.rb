@@ -4,12 +4,6 @@ module TinyCloud
       attr_reader :root_url, :default_life_time, :active_key,
         :url, :life_time, :prefix
 
-      def initialize( holder, request_processor )
-        super
-        @root_url = configuration.root_url
-        @default_life_time = configuration.temp_url_default_life_time
-      end
-
       def supported?
         context.type == :container
       end
@@ -17,7 +11,7 @@ module TinyCloud
       def request
         @url = [ context.url, context.path ].compact.join('/')
         @prefix = context.prefix
-        @life_time = context.life_time || default_life_time
+        @life_time = context.life_time || configuration.temp_url_default_life_time
 
         return [ url, query_args ].join('?') unless prefix
         -> (path) { "#{url}#{path}?#{query_args}" }
@@ -56,7 +50,7 @@ module TinyCloud
 
       def path
         # prefixed paths do not work..
-        [ ("prefix:" if prefix), url.gsub( root_url, '' ) ]
+        [ ("prefix:" if prefix), url.gsub( configuration.root_url, '' ) ]
           .compact
           .join
       end

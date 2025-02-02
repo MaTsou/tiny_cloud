@@ -1,11 +1,6 @@
 module TinyCloud
   class Hook
-    attr_reader :holder, :request_processor, :context
-
-    def initialize( holder, request_processor )
-      @holder = holder
-      @request_processor = request_processor
-    end
+    attr_reader :holder, :context
 
     def supported?
       true
@@ -15,11 +10,12 @@ module TinyCloud
       true
     end
 
-    def call( *before_hooks, context )
+    def call( *before_hooks, holder, context )
+      @holder = holder
       @context = context
       return :unsupported unless supported?
 
-      before_hooks.pop&.call( *before_hooks, context )
+      before_hooks.pop&.call( *before_hooks, holder, context )
 
       handle( request ) if needed?
     end
@@ -28,7 +24,7 @@ module TinyCloud
       response
     end
 
-    # hooks decorates their holder
+    # hooks decorates their holder (actually an account)
     def method_missing( meth, *args, **options )
       holder.send( meth, *args, **options )
     end

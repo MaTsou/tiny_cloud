@@ -10,7 +10,7 @@ module TinyCloud
       Key = Struct.new( :id, :header, :value, :birth_date )
 
       def needed?
-        !keys
+        temp_url_manager.keys_missing?
       end
 
       def request
@@ -18,7 +18,7 @@ module TinyCloud
           {
             url: context.url,
             method: :get,
-            options: { headers: account.header }
+            options: { headers: header }
           }
         )
       end
@@ -26,8 +26,7 @@ module TinyCloud
       def handle( response )
         case response
         in status2xx: response
-          set_keys( extract_keys_from response )
-          push_key_to_builder
+          temp_url_manager.set_keys( extract_keys_from response )
         else end
       end
 
@@ -40,7 +39,7 @@ module TinyCloud
               id: k,
               header: v,
               value: response.headers.fetch( v.downcase, nil ),
-              birth_date: now
+              birth_date: Time.now
             )
           ]
         end.to_h.transform_keys( ids )

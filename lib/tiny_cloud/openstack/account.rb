@@ -25,7 +25,7 @@ module TinyCloud
 
       def call( action_called, context )
         action( action_called )
-          .call(*hooks_for( action_called ), context )
+          .call(*hooks_for( action_called ), self, context )
       end
 
       def header
@@ -52,7 +52,7 @@ module TinyCloud
       end
 
       def set_action( action )
-        Object.const_get( get_hook_for action ).new( self, request_processor )
+        Object.const_get( get_hook_for action ).new
       end
 
       def get_hook_for( action )
