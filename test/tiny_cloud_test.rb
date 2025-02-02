@@ -57,23 +57,34 @@ describe TinyCloud::Storage do
   it "correctly build list request" do
     Excon.stub(
       { url: @storage.url, method: :get },
-      { status: 200 }
+      {}
     )
     @storage.list
   end
 
-  it "correctly build read request" do
-    skip
-    path = 'my_path'
+  it "correctly build read request on storage" do
+    Excon.stub(
+      { url: @storage.url, method: :get },
+      {}
+    )
+    @storage.read
+  end
 
-    @storage.read path
+  it "correctly build read request on container" do
+    path = 'my_path'
+    url = [ @storage.url, path ].join('/')
+    Excon.stub(
+      { url: url, method: :get },
+      {}
+    )
+    @storage.read path: path
   end
 
   it "correctly build remove request" do
     skip
     path = 'my_path'
 
-    @storage.remove path
+    @storage.remove path: path
   end
 
   describe :temp_url do
