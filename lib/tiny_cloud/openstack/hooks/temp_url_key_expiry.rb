@@ -1,6 +1,6 @@
 module TinyCloud
   module Openstack
-    class TempUrlKeyExpiryHook < TinyCloud::Hook
+    class TempUrlKeyExpiry < TinyCloud::Hook
       def needed?
         return false # temporary
         temp_url_manager.keys_expired?

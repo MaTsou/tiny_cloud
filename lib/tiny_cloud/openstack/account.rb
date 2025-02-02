@@ -3,7 +3,7 @@
 end
 
 %w( list read temp_url ).each do |f|
-  require_relative f
+  require_relative ["actions", f].join('/')
 end
 
 module TinyCloud

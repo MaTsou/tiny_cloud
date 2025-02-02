@@ -1,6 +1,6 @@
 module TinyCloud
   module Openstack
-    class TempUrlKeyMissingHook < TinyCloud::Hook
+    class TempUrlKeyMissing < TinyCloud::Hook
 
       HEADER_NAMES = {
         first: "X-Container-Meta-Temp-URL-Key",
