@@ -32,10 +32,6 @@ module TinyCloud
         { 'X-Auth-Token' => token_manager.auth_token }
       end
 
-      def set_active_key( key )
-        action(:temp_url).set_active_key key
-      end
-
       private
 
       def hooks_for( action )

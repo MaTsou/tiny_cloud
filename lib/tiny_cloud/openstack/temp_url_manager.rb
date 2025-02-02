@@ -26,16 +26,15 @@ module TinyCloud
         death_date( keys[:active] ) < tomorrow
       end
 
+      def active_key
+        keys[:active].value
+      end
+
       def set_keys( keys )
         @keys = keys
-        push_key_to_builder
       end
 
       private
-
-      def push_key_to_builder
-        account.set_active_key keys[:active].value
-      end
 
       def death_date( key )
         key.birth_date + convert_in_seconds( reset_key_after )

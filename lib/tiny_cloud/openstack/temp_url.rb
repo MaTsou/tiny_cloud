@@ -1,8 +1,7 @@
 module TinyCloud
   module Openstack
     class TempUrl < TinyCloud::Hook
-      attr_reader :root_url, :default_life_time, :active_key,
-        :url, :life_time, :prefix
+      attr_reader :root_url, :url, :prefix, :life_time, :default_life_time
 
       def supported?
         context.type == :container
@@ -17,8 +16,8 @@ module TinyCloud
         -> (path) { "#{url}#{path}?#{query_args}" }
       end
 
-      def set_active_key( key )
-        @active_key = key
+      def active_key
+        temp_url_manager.active_key
       end
 
       private
