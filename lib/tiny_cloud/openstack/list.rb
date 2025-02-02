@@ -1,6 +1,11 @@
 module TinyCloud
   module Openstack
     class List < TinyCloud::Hook
+      include ActionHook, Hooks
+
+      def before_hooks
+        chain( Hooks[:auth_token_expired] )
+      end
 
       def request
         request_processor.call(

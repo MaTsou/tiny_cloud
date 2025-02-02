@@ -1,18 +1,12 @@
-require_relative 'auth_token_expired_hook'
-
 module TinyCloud
   module Openstack
     class TokenManager
       include TinyCloud::TimeCalculation
       AUTH_TOKEN_OVERLAP = { hours: 1 }
 
-      attr_reader :account, :configuration, :hooks,
-        :auth_token_expires_at, :auth_token
+      attr_reader :auth_token_expires_at, :auth_token
 
-      def initialize( account )
-        @account = account
-        @configuration = account.configuration
-        @hooks = [ TinyCloud::Openstack::AuthTokenExpiredHook.new ]
+      def initialize
         @auth_token_expires_at = Time.new( 1900 ) # expired !
       end
 
@@ -23,10 +17,6 @@ module TinyCloud
       def set_auth_token( token, time )
         @auth_token = token
         @auth_token_expires_at = time
-      end
-
-      def hooks_for( action )
-        hooks.dup
       end
 
       def auth_token_reset_time

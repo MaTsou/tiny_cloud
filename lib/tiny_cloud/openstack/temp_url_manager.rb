@@ -1,21 +1,14 @@
 require 'json'
-require_relative 'temp_url_key_missing_hook'
-require_relative 'temp_url_key_expired_hook'
 
 module TinyCloud
   module Openstack
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      attr_reader :account, :keys, :hooks, :reset_key_after
+      attr_reader :keys, :reset_key_after
 
-      def initialize( account )
-        @account = account
-        @reset_key_after = account.configuration.temp_url_key_reset_after
-        @hooks = [
-          TinyCloud::Openstack::TempUrlKeyMissingHook.new,
-          TinyCloud::Openstack::TempUrlKeyExpiredHook.new
-        ]
+      def initialize( reset_key_after: { year: 1 } )
+        @reset_key_after = reset_key_after
       end
 
       def keys_missing?

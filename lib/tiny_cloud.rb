@@ -7,6 +7,7 @@ require_relative "tiny_cloud/time_calculation"
 require_relative "tiny_cloud/request_processor"
 require_relative "tiny_cloud/request"
 require_relative "tiny_cloud/hook"
+require_relative "tiny_cloud/action_hook"
 require_relative "tiny_cloud/excon/http_client"
 
 module TinyCloud

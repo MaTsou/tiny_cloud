@@ -1,4 +1,4 @@
-%w( token_manager temp_url_manager configuration ).each do |f|
+%w( token_manager temp_url_manager configuration hooks_manager ).each do |f|
   require_relative f
 end
 
@@ -11,12 +11,14 @@ module TinyCloud
     class Account
       attr_reader :temp_url_manager, :token_manager, :request_processor, :actions
 
-      def initialize( request_processor = nil )
+      def initialize( request_processor = TinyCloud::RequestProcessor.new )
         yield configuration
-        @request_processor = request_processor || TinyCloud::RequestProcessor.new
+        @request_processor = request_processor
         @actions = {}
-        @temp_url_manager = Openstack::TempUrlManager.new( self )
-        @token_manager = Openstack::TokenManager.new( self )
+        @temp_url_manager = Openstack::TempUrlManager.new(
+          reset_key_after: configuration.temp_url_key_reset_after
+        )
+        @token_manager = Openstack::TokenManager.new
       end
 
       def configuration
@@ -24,8 +26,7 @@ module TinyCloud
       end
 
       def call( action_called, context )
-        action( action_called )
-          .call(*hooks_for( action_called ), self, context )
+        action( action_called ).call( self, context )
       end
 
       def header
@@ -33,15 +34,6 @@ module TinyCloud
       end
 
       private
-
-      def hooks_for( action )
-        case action
-        when :list, :read, :add, :remove
-          token_manager.hooks
-        when :temp_url
-          token_manager.hooks.concat temp_url_manager.hooks
-        end
-      end
 
       def action( action )
         actions[ action ] ||= set_action( action )
