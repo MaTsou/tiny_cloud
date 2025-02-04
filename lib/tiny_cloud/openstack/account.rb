@@ -13,6 +13,7 @@ module TinyCloud
 
       def initialize( request_processor = TinyCloud::RequestProcessor.new )
         yield configuration
+        @action_manager = Action.new
         @request_processor = request_processor
         @temp_url_manager = Openstack::TempUrlManager.new(
           reset_key_after: configuration.temp_url_key_reset_after
@@ -35,7 +36,8 @@ module TinyCloud
       private
 
       def action( action )
-        Action.registered_actions( action )
+        #Action.registered_action( action )
+        @action_manager.registered_action action
       end
     end
   end

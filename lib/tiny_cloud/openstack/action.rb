@@ -8,7 +8,8 @@ end
 
 module TinyCloud
   module Openstack
-    class Action < TinyCloud::Action
+    class Action# < TinyCloud::Action
+      extend ActionManager
 
       register_hook :auth_token_expiry, TinyCloud::Openstack::AuthTokenExpiry
       register_hook :temp_url_key_missing, TinyCloud::Openstack::TempUrlKeyMissing
