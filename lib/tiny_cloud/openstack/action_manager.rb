@@ -14,19 +14,19 @@ module TinyCloud
   module Openstack
     class ActionManager < TinyCloud::ActionManager
 
-      register_hook :auth_token_expiry, TinyCloud::Openstack::AuthTokenExpiry
-      register_hook :temp_url_key_missing, TinyCloud::Openstack::TempUrlKeyMissing
-      register_hook :temp_url_key_expiry, TinyCloud::Openstack::TempUrlKeyExpiry
+      register_hook :auth_token_expiry, AuthTokenExpiry
+      register_hook :temp_url_key_missing, TempUrlKeyMissing
+      register_hook :temp_url_key_expiry, TempUrlKeyExpiry
 
-      register_action :list, TinyCloud::Openstack::List do |hooks|
+      register_action :list, List do |hooks|
         hooks.push :auth_token_expiry
       end
 
-      register_action :read, TinyCloud::Openstack::Read do |hooks|
+      register_action :read, Read do |hooks|
         hooks.push :auth_token_expiry
       end
 
-      register_action :temp_url, TinyCloud::Openstack::TempUrl do |hooks|
+      register_action :temp_url, TempUrl do |hooks|
         hooks.push :auth_token_expiry
         hooks.push :temp_url_key_missing
         hooks.push :temp_url_key_expiry
