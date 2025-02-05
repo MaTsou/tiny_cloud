@@ -37,7 +37,7 @@ module TinyCloud
       end
 
       def expires
-        @expires ||= ( Time.now + life_time ).to_i
+        ( Time.now + life_time ).to_i
       end
 
       def sig
