@@ -4,13 +4,13 @@ module TinyCloud
       include TinyCloud::Chainable
 
       def needed?
-        token_manager.token_expired?
+        auth_manager.token_expired?
       end
 
       def request
         request_processor.call(
           {
-            url: token_url,
+            url: auth_manager.token_url,
             method: :post,
             options: { headers: renewing_headers, body: renewing_body }
           }
@@ -20,7 +20,7 @@ module TinyCloud
       def handle( response )
         case response
         in status2xx: response
-          token_manager.set_auth_token(
+          auth_manager.set_token(
             response.headers['x-subject-token'], expiry( response )
           )
         in status4xx: response
@@ -37,31 +37,28 @@ module TinyCloud
           .getlocal
       end
 
-      def token_url
-        [ configuration.auth_url, 'auth', 'tokens' ].join '/'
-      end
-
       def renewing_headers
         { 'Content-Type' => 'application/json' }
       end
 
       def renewing_body
+        config = configuration
         {
           auth: {
             identity: {
               methods: ["password"],
               password: {
                 user: {
-                  domain: { name: configuration.user_domain_name },
-                  name: configuration.user_name,
-                  password: configuration.password
+                  domain: { name: config.user_domain_name },
+                  name: config.user_name,
+                  password: config.password
                 }
               }
             },
             scope: {
               project: {
-                domain: { name: configuration.project_domain_name },
-                name: configuration.project_name
+                domain: { name: config.project_domain_name },
+                name: config.project_name
               }
             }
           }

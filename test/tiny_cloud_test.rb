@@ -45,9 +45,9 @@ describe TinyCloud::Storage do
   it "correctly set auth_token" do
     Excon.stub( { method: :get }, {} )
     @storage.list
-    resulting = @account.token_manager
-    _( resulting.auth_token ).must_equal AUTH_TOKEN
-    _( resulting.auth_token_expires_at ).must_equal AUTH_TOKEN_EXPIRES_AT
+    auth_manager = @account.auth_manager
+    _( auth_manager.token ).must_equal AUTH_TOKEN
+    _( auth_manager.token_expires_at ).must_equal AUTH_TOKEN_EXPIRES_AT
   end
 
   it "correctly build list request" do

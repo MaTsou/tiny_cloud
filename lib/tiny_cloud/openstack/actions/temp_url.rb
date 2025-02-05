@@ -12,7 +12,7 @@ module TinyCloud
       def request
         @url = [ context.url, context.path ].compact.join('/')
         @prefix = context.prefix
-        @life_time = context.life_time || configuration.temp_url_default_life_time
+        @life_time = context.life_time || temp_url_manager.default_life_time
 
         return [ url, query_args ].join('?') unless prefix
         -> (path) { "#{url}#{path}?#{query_args}" }

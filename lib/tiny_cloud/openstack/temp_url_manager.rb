@@ -5,10 +5,18 @@ module TinyCloud
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      attr_reader :keys, :reset_key_after
+      attr_reader :keys
 
-      def initialize( reset_key_after: { year: 1 } )
-        @reset_key_after = reset_key_after
+      def initialize( config )
+        @config = config
+      end
+
+      def reset_key_after
+        @config.temp_url_key_reset_after
+      end
+
+      def default_life_time
+        @config.temp_url_default_life_time
       end
 
       def keys_missing?

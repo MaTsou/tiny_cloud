@@ -19,7 +19,7 @@ module TinyCloud
           {
             url: context.url,
             method: :get,
-            options: { headers: header }
+            options: { headers: auth_manager.headers }
           }
         )
       end
