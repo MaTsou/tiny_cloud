@@ -1,17 +1,19 @@
 module TinyCloud
   module Openstack
-    class List
-      include TinyCloud::Chainable
+    module Actions
+      class List
+        include TinyCloud::Chainable
 
-      def request
-        request_processor.call(
-          {
-            options: { headers: auth_manager.headers },
-            url: context[:url],
-            path: context[:path],
-            method: :get
-          }.compact
-        )
+        def request
+          request_processor.call(
+            {
+              options: { headers: auth_manager.headers },
+              url: context[:url],
+              path: context[:path],
+              method: :get
+            }.compact
+          )
+        end
       end
     end
   end

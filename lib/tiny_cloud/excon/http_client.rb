@@ -1,5 +1,4 @@
 require 'excon'
-require_relative 'response_formatter'
 
 module TinyCloud
   module Excon

@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
+  spec.add_runtime_dependency "zeitwerk", "~> 2.7"
   spec.add_runtime_dependency "excon", "~> 1.2"
   spec.add_runtime_dependency "json", "~> 2.9"
   spec.add_development_dependency "minitest", "~> 5.24"

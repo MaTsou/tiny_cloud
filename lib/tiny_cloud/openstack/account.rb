@@ -1,7 +1,3 @@
-%w( auth_manager temp_url_manager configuration action_manager ).each do |f|
-  require_relative f
-end
-
 module TinyCloud
   module Openstack
     class Account
