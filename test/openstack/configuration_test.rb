@@ -31,12 +31,10 @@ describe TinyCloud::Openstack do
   end
 
   it "correctly set config and instanciate default builders" do
-    rqp = @storage.account.request_processor
     config = @storage.account.configuration
     _( config.class ).must_equal DEFAULT_CONFIG_CLASS
     _( config.root_url ).must_equal ROOT_URL
     _( config.is_a? DEFAULT_CONFIG_CLASS ).must_equal true
-    _( rqp.http_client.class ).must_equal DEFAULT_HTTP_CLIENT
   end
 
 end

@@ -1,20 +1,15 @@
-%w( token_manager temp_url_manager configuration action ).each do |f|
+%w( token_manager temp_url_manager configuration action_manager ).each do |f|
   require_relative f
-end
-
-%w( list read temp_url ).each do |f|
-  require_relative ["actions", f].join('/')
 end
 
 module TinyCloud
   module Openstack
     class Account
-      attr_reader :temp_url_manager, :token_manager, :request_processor
+      attr_reader :temp_url_manager, :token_manager, :action_manager
 
       def initialize( request_processor = TinyCloud::RequestProcessor.new )
         yield configuration
-        @action_manager = Action.new
-        @request_processor = request_processor
+        @action_manager = Openstack::ActionManager.new( self, request_processor )
         @temp_url_manager = Openstack::TempUrlManager.new(
           reset_key_after: configuration.temp_url_key_reset_after
         )
@@ -25,20 +20,14 @@ module TinyCloud
         @configuration ||= Openstack::Configuration.new
       end
 
-      def call( action_called, context )
-        action( action_called ).call( self, context )
+      def call( action, context )
+        @action_manager.call( action, context )
       end
 
       def header
         { 'X-Auth-Token' => token_manager.auth_token }
       end
 
-      private
-
-      def action( action )
-        #Action.registered_action( action )
-        @action_manager.registered_action action
-      end
     end
   end
 end

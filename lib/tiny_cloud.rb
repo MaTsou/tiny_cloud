@@ -4,8 +4,9 @@ require 'ustruct'
 require_relative "tiny_cloud/version"
 require_relative "tiny_cloud/storage"
 require_relative "tiny_cloud/time_calculation"
+require_relative "tiny_cloud/chainable"
 require_relative "tiny_cloud/request_processor"
-require_relative "tiny_cloud/action"
+require_relative "tiny_cloud/action_manager"
 require_relative "tiny_cloud/excon/http_client"
 
 module TinyCloud

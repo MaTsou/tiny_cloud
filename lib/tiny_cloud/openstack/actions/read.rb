@@ -1,10 +1,7 @@
 module TinyCloud
   module Openstack
-    class Read < Openstack::Action
-
-      def before_hooks
-        [ registered_hooks[:auth_token_expiry] ]
-      end
+    class Read
+      include TinyCloud::Chainable
 
       def request
         request_processor.call(

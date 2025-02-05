@@ -1,6 +1,7 @@
 module TinyCloud
   module Openstack
-    class AuthTokenExpiry < TinyCloud::Hook
+    class AuthTokenExpiry
+      include TinyCloud::Chainable
 
       def needed?
         token_manager.token_expired?
