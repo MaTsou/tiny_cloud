@@ -28,12 +28,8 @@ describe TinyCloud::Storage do
 
     @configuration = @account.configuration
 
-    @storage = TinyCloud::Storage.new do |storage|
-      storage.account = @account
-      storage.url = URL
-
-      @auth_url = [ @configuration.auth_url, "/auth/tokens" ].join
-    end
+    @storage = TinyCloud::Storage.new( @account, url: URL )
+    @auth_url = [ @configuration.auth_url, "/auth/tokens" ].join
 
     Excon.stub(
       { url: @auth_url, method: :post },

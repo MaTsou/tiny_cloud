@@ -20,13 +20,12 @@ describe TinyCloud::Openstack do
       config.user_domain_name = 'default'
       config.auth_url = 'This_is_auth_url'
       config.password = 'My_wonderful_and_unbreakable_pwv'
-      config.temp_url_default_life_time = 300
-      config.temp_url_key_reset_after = { days: 30 }
     end
 
-    @storage = TinyCloud::Storage.new do |storage|
-      storage.account = @auth
-      storage.url = STORAGE_URL
+
+    @storage = TinyCloud::Storage.new( @auth, url: STORAGE_URL ) do |config|
+      config.temp_url_default_life_time = 300
+      config.temp_url_key_reset_after = { days: 30 }
     end
   end
 

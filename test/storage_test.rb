@@ -10,14 +10,8 @@ describe TinyCloud::Storage do
   end
 
   describe "instanciation" do
-    def container_instance_test( storage, name )
-    end
-
     it "returns correctly built instance" do
-      storage = klass.new do |storage|
-        storage.account = F_ACCOUNT
-        storage.url = F_URL
-      end
+      storage = klass.new( F_ACCOUNT, url: F_URL )
       _( storage.url ).must_equal F_URL
       _( storage.account ).must_equal F_ACCOUNT
       _( storage.type ).must_equal D_TYPE
@@ -25,10 +19,7 @@ describe TinyCloud::Storage do
 
     it "returns a container type storage on call" do
       name = 'my_container_name'
-      storage = klass.new do |storage|
-        storage.account = F_ACCOUNT
-        storage.url = F_URL
-      end
+      storage = klass.new( F_ACCOUNT, url: F_URL )
       container = storage.call( name )
 
       _( container.url ).must_equal [F_URL, name].join('/')
@@ -40,10 +31,7 @@ describe TinyCloud::Storage do
   describe "usage" do
 
     before do
-      @storage = klass.new do |s|
-        s.url = F_URL
-        s.account = Minitest::Mock.new
-      end
+      @storage = klass.new( Minitest::Mock.new, url: F_URL )
     end
 
     it "delegates methods to account" do
