@@ -1,15 +1,8 @@
 module TinyCloud
   class ActionManager
-    def self.register_hook( name, object )
-      @@lazy_hooks ||= {}
-      @@lazy_hooks[name] ||= object
-    end
-
-    def self.register_action( name, object )
-      @@lazy_actions ||= {}
-      @@lazy_actions[ to_snake object ] = object
+    def self.register_action( name )
       @@action_hooks ||= {}
-      @@action_hooks[ to_snake object ] = yield []
+      @@action_hooks[ name ] = yield []
     end
 
     def initialize( holder, request_processor )
@@ -28,15 +21,31 @@ module TinyCloud
 
     def get_action( action )
       @actions[ action ] ||= {
-        action: @@lazy_actions[ action ].new,
-        hooks: @@action_hooks[ action ]&.map { |h| @hooks[h] ||= @@lazy_hooks[h].new }
+        action: to_action_const( action ).new,
+        hooks: awake_hooks( action )
       }
     end
 
     def awake_hooks( action )
       @@action_hooks[ action ]&.map do |hook|
-        @hooks[hook] ||= @@lazy_hooks[hook].new
+        @hooks[hook] ||= to_hook_const( hook ).new
       end
+    end
+
+    def to_const( name )
+      name.to_s.split('_').map(&:capitalize).join
+    end
+
+    def prefix
+      self.class.to_s.gsub( /::[A-Z,a-z,0-9]*$/, '' )
+    end
+
+    def to_action_const( name )
+      Object.const_get( [ prefix, "Actions", to_const( name ) ].join('::') )
+    end
+
+    def to_hook_const( name )
+      Object.const_get( [ prefix, "Hooks", to_const( name ) ].join('::') )
     end
 
     def self.to_action( str )
