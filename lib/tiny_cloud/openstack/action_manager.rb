@@ -15,6 +15,10 @@ module TinyCloud
         hooks.push :temp_url_key_missing
         hooks.push :temp_url_key_expiry
       end
+
+      register_action :set_allowed_origins do |hooks|
+        hooks.push :auth_token_expiry
+      end
     end
   end
 end
