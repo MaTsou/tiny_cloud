@@ -19,6 +19,10 @@ module TinyCloud
       register_action :set_allowed_origins do |hooks|
         hooks.push :auth_token_expiry
       end
+
+      register_action :set_exposed_headers do |hooks|
+        hooks.push :auth_token_expiry
+      end
     end
   end
 end
