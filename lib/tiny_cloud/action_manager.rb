@@ -2,7 +2,7 @@ module TinyCloud
   class ActionManager
     def self.register_action( name )
       @@action_hooks ||= {}
-      @@action_hooks[ name ] = yield []
+      @@action_hooks[ name ] = yield [] if block_given?
     end
 
     def initialize( holder, request_processor )
