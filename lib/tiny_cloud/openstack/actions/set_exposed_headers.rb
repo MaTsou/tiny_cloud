@@ -22,7 +22,7 @@ module TinyCloud
         private
 
         def exposed_header
-          { 'X-Container-Meta-Access-Control-Exposed-Headers' =>
+          { 'X-Container-Meta-Access-Control-Expose-Headers' =>
             context.exposed_headers }
         end
       end
