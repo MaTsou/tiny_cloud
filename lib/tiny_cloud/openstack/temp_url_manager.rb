@@ -5,14 +5,42 @@ module TinyCloud
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
+      HEADER_NAMES = {
+        first: "X-Container-Meta-Temp-URL-Key",
+        second: "X-Container-Meta-Temp-URL-Key-2",
+      }
+
+      Key = Struct.new( 'Key', :id, :header, :value, :death_date ) do
+        include TinyCloud::TimeCalculation
+
+        def expired?
+          value.nil? || death_date < Time.now #tomorrow
+        end
+
+        def build_value
+          expired? ? generate : value
+        end
+
+        private
+
+        def generate
+          "Unbreakable-#{Time.now}-Temp_Url_Key"
+        end
+
+      end
+
       attr_reader :keys
 
       def initialize( config )
         @config = config
       end
 
+      def http_header_names
+        self.class::HEADER_NAMES
+      end
+
       def reset_key_after
-        @config.temp_url_key_reset_after
+        convert_in_seconds @config.temp_url_key_reset_after
       end
 
       def default_life_time
@@ -38,6 +66,7 @@ module TinyCloud
 
       def set_keys( keys )
         @keys = keys
+        keys[:other].death_date += reset_key_after / 2
       end
 
       private
@@ -45,6 +74,7 @@ module TinyCloud
       def death_date( key )
         key.birth_date + convert_in_seconds( reset_key_after )
       end
+
     end
   end
 end

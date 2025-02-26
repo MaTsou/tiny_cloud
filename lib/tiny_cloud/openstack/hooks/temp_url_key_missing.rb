@@ -4,13 +4,6 @@ module TinyCloud
       class TempUrlKeyMissing
         include TinyCloud::Chainable
 
-        HEADER_NAMES = {
-          first: "X-Container-Meta-Temp-URL-Key",
-          second: "X-Container-Meta-Temp-URL-Key-2",
-        }
-
-        Key = Struct.new( :id, :header, :value, :birth_date )
-
         def needed?
           temp_url_manager.keys_missing?
         end
@@ -35,9 +28,9 @@ module TinyCloud
         private
 
         def extract_keys_from( response )
-          HEADER_NAMES.map do |k, v|
+          temp_url_manager.http_header_names.map do |k, v|
             [ k,
-              Key.new(
+              temp_url_manager.build_key(
                 id: k,
                 header: v,
                 value: response.headers.fetch( v.downcase, nil ),
@@ -50,6 +43,7 @@ module TinyCloud
         def ids
           { first: :active, second: :other }
         end
+
       end
     end
   end
