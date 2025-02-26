@@ -22,7 +22,7 @@ module TinyCloud
         private
 
         def active_key
-          temp_url_manager.active_key
+          temp_url_manager.active_key.value
         end
 
         def query_args

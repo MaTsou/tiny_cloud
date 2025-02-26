@@ -28,7 +28,12 @@ module TinyCloud
       end
 
       def active_key
-        keys[:active].value
+        keys[:active]
+      end
+
+      def build_key( **options )
+        options[:death_date] = options.delete( :birth_date ) + reset_key_after
+        Key.new( **options )
       end
 
       def set_keys( keys )
