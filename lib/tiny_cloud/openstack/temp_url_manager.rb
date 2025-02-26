@@ -69,10 +69,8 @@ module TinyCloud
         keys[:other].death_date += reset_key_after / 2
       end
 
-      private
-
-      def death_date( key )
-        key.birth_date + convert_in_seconds( reset_key_after )
+      def permute_keys
+        @keys.transform_keys!( active: :other, other: :active )
       end
 
     end
