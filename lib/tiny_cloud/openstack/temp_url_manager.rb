@@ -13,7 +13,7 @@ module TinyCloud
         end
 
         def expired?
-          death_date < tomorrow
+          death_date < Time.now
         end
 
         def nil_or_expired?
