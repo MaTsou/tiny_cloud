@@ -1,4 +1,5 @@
 require 'json'
+require 'securerandom'
 
 module TinyCloud
   module Openstack
@@ -28,7 +29,7 @@ module TinyCloud
         private
 
         def generate
-          "Unbreakable-#{Time.now}-Temp_Url_Key"
+          "Unbreakable-#{SecureRandom.alphanumeric}-Temp_Url_Key"
         end
 
       end
