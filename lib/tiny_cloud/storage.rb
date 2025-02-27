@@ -16,7 +16,8 @@ module TinyCloud
         url: join_paths( url, sub_storage_name ),
         type: :container
       )
-      block_given? ? yield( container ) : container
+      yield container if block_given?
+      container
     end
 
     # delegation to account : building operation queues to be performed
