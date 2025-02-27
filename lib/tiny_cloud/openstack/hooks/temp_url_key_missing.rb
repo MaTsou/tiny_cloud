@@ -28,20 +28,9 @@ module TinyCloud
         private
 
         def extract_keys_from( response )
-          temp_url_manager.http_header_names.map do |k, v|
-            [ k,
-              temp_url_manager.build_key(
-                id: k,
-                header: v,
-                value: response.headers.fetch( v.downcase, nil ),
-                birth_date: Time.now
-              )
-            ]
-          end.to_h.transform_keys( ids )
-        end
-
-        def ids
-          { first: :active, second: :other }
+          temp_url_manager.http_header_names.map do |header|
+            [ header, response.headers.fetch( header.downcase, nil ) ]
+          end.to_h
         end
 
       end

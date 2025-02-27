@@ -5,12 +5,12 @@ module TinyCloud
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      HEADER_NAMES = {
-        first: "X-Container-Meta-Temp-URL-Key",
-        second: "X-Container-Meta-Temp-URL-Key-2",
-      }
+      HEADER_NAMES = [
+        "X-Container-Meta-Temp-URL-Key",
+        "X-Container-Meta-Temp-URL-Key-2",
+      ]
 
-      Key = Struct.new( 'Key', :id, :header, :value, :death_date ) do
+      Key = Struct.new( 'Key', :header, :value, :death_date ) do
         include TinyCloud::TimeCalculation
 
         def expired?
@@ -36,7 +36,7 @@ module TinyCloud
       end
 
       def http_header_names
-        self.class::HEADER_NAMES
+        self.class::HEADER_NAMES.dup
       end
 
       def reset_key_after
@@ -51,22 +51,23 @@ module TinyCloud
         !keys
       end
 
-      def keys_expired?
-        death_date( keys[:active] ) < tomorrow
-      end
-
       def active_key
         keys[:active]
       end
 
-      def build_key( **options )
-        options[:death_date] = options.delete( :birth_date ) + reset_key_after
-        Key.new( **options )
-      end
-
       def set_keys( keys )
-        @keys = keys
-        keys[:other].death_date += reset_key_after / 2
+        statuses = %i( active other )
+
+        @keys = keys.map do |header, key|
+          [
+            statuses.shift,
+            Key.new(
+              header: header,
+              value: key,
+              death_date: Time.now + reset_key_after
+            )
+          ]
+        end.to_h
       end
 
       def permute_keys
