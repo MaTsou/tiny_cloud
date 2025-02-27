@@ -37,7 +37,7 @@ module TinyCloud
     end
 
     def prefix
-      self.class.to_s.gsub( /::[A-Z,a-z,0-9]*$/, '' )
+      self.class.to_s.gsub( /::\w*$/, '' )
     end
 
     def to_action_const( name )
