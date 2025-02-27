@@ -5,11 +5,6 @@ module TinyCloud
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      HEADER_NAMES = [
-        "X-Container-Meta-Temp-URL-Key",
-        "X-Container-Meta-Temp-URL-Key-2",
-      ]
-
       Key = Struct.new( 'Key', :header, :value, :death_date ) do
         include TinyCloud::TimeCalculation
 
@@ -42,10 +37,6 @@ module TinyCloud
 
       def initialize( config )
         @config = config
-      end
-
-      def http_header_names
-        self.class::HEADER_NAMES.dup
       end
 
       def reset_key_after
