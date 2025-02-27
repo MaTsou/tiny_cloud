@@ -11,11 +11,12 @@ module TinyCloud
 
     def call( sub_storage_name )
       return unless type == :storage #  a single nested storage level (container)
-      self.class.new(
+      container = self.class.new(
         account,
         url: join_paths( url, sub_storage_name ),
         type: :container
       )
+      block_given? ? yield( container ) : container
     end
 
     # delegation to account : building operation queues to be performed
