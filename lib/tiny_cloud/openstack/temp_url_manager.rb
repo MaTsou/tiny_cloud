@@ -13,12 +13,21 @@ module TinyCloud
       Key = Struct.new( 'Key', :header, :value, :death_date ) do
         include TinyCloud::TimeCalculation
 
-        def expired?
-          value.nil? || death_date < Time.now #tomorrow
+        def nil?
+          value.nil?
         end
 
-        def build_value
-          expired? ? generate : value
+        def expired?
+          death_date < tomorrow
+        end
+
+        def nil_or_expired?
+          nil? || expired?
+        end
+
+        def build_value( status )
+          return generate if status == :active || nil?
+          value
         end
 
         private

@@ -5,7 +5,7 @@ module TinyCloud
         include TinyCloud::Chainable
 
         def needed?
-          temp_url_manager.active_key.expired?
+          temp_url_manager.active_key.nil_or_expired?
         end
 
         def request
@@ -25,7 +25,7 @@ module TinyCloud
 
             %i( other active ).each do |status|# order is important..
               key = temp_url_manager.keys[ status ]
-              next unless key.expired?
+              next unless key.nil_or_expired?
 
               new_death_date += temp_url_manager.reset_key_after / 2# shift keys
               # Here, because of POST request, headers do not contain 
@@ -41,9 +41,9 @@ module TinyCloud
         private
 
         def set_temp_url_key_header
-          # set both because both are expired on first connection !
-          @new_keys = temp_url_manager.keys.map do |k,v|
-            [ v.header, v.build_value ]
+          # set both because sometime both are expired..
+          @new_keys = temp_url_manager.keys.map do |status, key|
+            [ key.header, key.build_value( status ) ]
           end.to_h
         end
 
