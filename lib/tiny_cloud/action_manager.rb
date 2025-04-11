@@ -1,63 +1,72 @@
+# frozen_string_literal: true
+
 module TinyCloud
+  # Action manager base class
   class ActionManager
-    def self.register_action( name )
+    def self.register_action(name)
+      # Sorry rubocop but I need this...
+      # rubocop:disable Style/ClassVars
       @@action_hooks ||= {}
-      @@action_hooks[ name ] = yield [] if block_given?
+      @@action_hooks[name] = yield [] if block_given?
+      # rubocop:enable Style/ClassVars
     end
 
-    def initialize( holder, request_processor )
+    def initialize(holder, request_processor)
       @holder = holder
       @request_processor = request_processor
       @actions = {}
       @hooks = {}
     end
 
-    def call( action, context )
-      called = get_action( action )
-      called[ :action ].call(
-        *called[ :hooks ], @holder, @request_processor, context
+    def call(action, context)
+      called = get_action(action)
+      called[:action].call(
+        *called[:hooks], @holder, @request_processor, context
       )
     end
 
-    def get_action( action )
-      @actions[ action ] ||= {
-        action: to_action_const( action ).new,
-        hooks: awake_hooks( action )
+    def get_action(action)
+      @actions[action] ||= {
+        action: to_action_const(action).new,
+        hooks: awake_hooks(action)
       }
     end
 
-    def awake_hooks( action )
-      @@action_hooks[ action ]&.map do |hook|
-        @hooks[hook] ||= to_hook_const( hook ).new
+    def awake_hooks(action)
+      @@action_hooks[action]&.map do |hook|
+        @hooks[hook] ||= to_hook_const(hook).new
       end
     end
 
-    def to_const( name )
+    def to_const(name)
       name.to_s.split('_').map(&:capitalize).join
     end
 
     def prefix
-      self.class.to_s.gsub( /::\w*$/, '' )
+      self.class.to_s.gsub(/::\w*$/, '')
     end
 
-    def to_action_const( name )
-      Object.const_get( [ prefix, "Actions", to_const( name ) ].join('::') )
+    def to_action_const(name)
+      Object.const_get(
+        [prefix, 'Actions', to_const(name)].join('::')
+      )
     end
 
-    def to_hook_const( name )
-      Object.const_get( [ prefix, "Hooks", to_const( name ) ].join('::') )
+    def to_hook_const(name)
+      Object.const_get(
+        [prefix, 'Hooks', to_const(name)].join('::')
+      )
     end
 
-    def self.to_action( str )
+    def self.to_action(str)
       str.to_s.split('::').last
     end
 
-    def self.to_snake( str )
-      to_action( str )
-        .gsub( /([a-z]+)([A-Z])/, '\1_\2' )
+    def self.to_snake(str)
+      to_action(str)
+        .gsub(/([a-z]+)([A-Z])/, '\1_\2')
         .downcase
         .to_sym
     end
-
   end
 end
