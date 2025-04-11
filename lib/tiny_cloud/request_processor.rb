@@ -22,8 +22,8 @@ module TinyCloud
     def formatted_request(request)
       request_formatter.new(
         get_url(request),
-        request[:http_method],
-        request[:http_options]
+        request[:method],
+        request[:options]
       )
     end
 
