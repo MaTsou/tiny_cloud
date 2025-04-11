@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module TinyCloud
   module Openstack
+    # openstack action manager
     class ActionManager < TinyCloud::ActionManager
-
       register_action :list do |hooks|
         hooks.push :auth_token_expiry
       end
@@ -30,4 +32,3 @@ module TinyCloud
     end
   end
 end
-

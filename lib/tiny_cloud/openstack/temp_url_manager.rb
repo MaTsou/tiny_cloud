@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'securerandom'
 
 module TinyCloud
   module Openstack
+    # openstack temp url manager
     class TempUrlManager
       include TinyCloud::TimeCalculation
 
-      Key = Struct.new( 'Key', :header, :value, :death_date ) do
+      Key = Struct.new('Key', :header, :value, :death_date) do
         include TinyCloud::TimeCalculation
 
         def nil?
@@ -21,8 +24,9 @@ module TinyCloud
           nil? || expired?
         end
 
-        def build_value( status )
+        def build_value(status)
           return generate if status == :active || nil?
+
           value
         end
 
@@ -31,12 +35,11 @@ module TinyCloud
         def generate
           "Unbreakable-#{SecureRandom.alphanumeric}-Temp_Url_Key"
         end
-
       end
 
       attr_reader :keys
 
-      def initialize( config )
+      def initialize(config)
         @config = config
       end
 
@@ -56,25 +59,30 @@ module TinyCloud
         keys[:active]
       end
 
-      def set_keys( keys )
-        statuses = %i( active other )
+      def build_keys(keys)
+        statuses = %i[active other]
 
-        @keys = keys.map do |header, key|
+        @keys = keys.to_h do |header, key|
           [
             statuses.shift,
-            Key.new(
-              header: header,
-              value: key,
-              death_date: Time.now + reset_key_after
-            )
+            key_content(header, key)
           ]
-        end.to_h
+        end
       end
 
       def permute_keys
-        @keys.transform_keys!( active: :other, other: :active )
+        @keys.transform_keys!(active: :other, other: :active)
       end
 
+      private
+
+      def key_content(header, key)
+        Key.new(
+          header: header,
+          value: key,
+          death_date: Time.now + reset_key_after
+        )
+      end
     end
   end
 end
