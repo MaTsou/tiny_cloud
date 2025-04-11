@@ -1,13 +1,16 @@
+# frozen_string_literal: true
+
 module TinyCloud
   module Openstack
     module Hooks
+      # openstack temp url key missing hook defintion
       class TempUrlKeyMissing
         include TinyCloud::Chainable
 
-        HEADER_NAMES = [
-          "X-Container-Meta-Temp-URL-Key",
-          "X-Container-Meta-Temp-URL-Key-2",
-        ]
+        HEADER_NAMES = %w[
+          X-Container-Meta-Temp-URL-Key
+          X-Container-Meta-Temp-URL-Key-2
+        ].freeze
 
         def needed?
           temp_url_manager.keys_missing?
@@ -23,21 +26,20 @@ module TinyCloud
           )
         end
 
-        def handle( response )
+        def handle(response)
           case response
           in status2xx: response
-            temp_url_manager.set_keys( extract_keys_from response )
+            temp_url_manager.build_keys extract_keys_from(response)
           else end
         end
 
         private
 
-        def extract_keys_from( response )
-          HEADER_NAMES.map do |header|
-            [ header, response.headers.fetch( header.downcase, nil ) ]
-          end.to_h
+        def extract_keys_from(response)
+          HEADER_NAMES.to_h do |header|
+            [header, response.headers.fetch(header.downcase, nil)]
+          end
         end
-
       end
     end
   end

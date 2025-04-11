@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 module TinyCloud
   module Openstack
     module Actions
+      # temp url action definition
       class TempUrl
         include TinyCloud::Chainable
 
@@ -11,15 +14,19 @@ module TinyCloud
         end
 
         def request
-          @url = [ context.url, context.path ].compact.join('/')
-          @prefix = context.prefix
-          @life_time = context.life_time || temp_url_manager.default_life_time
+          set_attributes
+          return [url, query_args].join('?') unless prefix
 
-          return [ url, query_args ].join('?') unless prefix
-          -> (path) { "#{url}#{path}?#{query_args}" }
+          ->(path) { "#{url}#{path}?#{query_args}" }
         end
 
         private
+
+        def set_attributes
+          @url = [context.url, context.path].compact.join('/')
+          @prefix = context.prefix
+          @life_time = context.life_time || temp_url_manager.default_life_time
+        end
 
         def active_key
           temp_url_manager.active_key.value
@@ -38,12 +45,12 @@ module TinyCloud
         end
 
         def expires
-          ( Time.now + life_time ).to_i
+          (Time.now + life_time).to_i
         end
 
         def sig
-          digest = OpenSSL::Digest.new( 'sha256' )
-          OpenSSL::HMAC.hexdigest( digest, active_key, my_data )
+          digest = OpenSSL::Digest.new('sha256')
+          OpenSSL::HMAC.hexdigest(digest, active_key, my_data)
         end
 
         def my_data
@@ -52,11 +59,10 @@ module TinyCloud
 
         def path
           # prefixed paths do not work..
-          [ ("prefix:" if prefix), url.gsub( configuration.root_url, '' ) ]
+          [('prefix:' if prefix), url.gsub(configuration.root_url, '')]
             .compact
             .join
         end
-
       end
     end
   end

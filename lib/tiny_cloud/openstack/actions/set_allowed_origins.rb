@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 module TinyCloud
   module Openstack
     module Actions
+      # set allowed origins action definition
       class SetAllowedOrigins
         include TinyCloud::Chainable
 
@@ -11,10 +14,10 @@ module TinyCloud
         def request
           request_processor.call(
             {
-              options: { headers: auth_manager.headers.merge( cors_header ) },
               url: context[:url],
               path: context[:path],
-              method: :post
+              method: :post,
+              options: { headers: auth_manager.headers.merge(cors_header) }
             }.compact
           )
         end
