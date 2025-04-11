@@ -10,6 +10,10 @@ module TinyCloud
         hooks.push :auth_token_expiry
       end
 
+      register_action :upload do |hooks|
+        hooks.push :auth_token_expiry
+      end
+
       register_action :temp_url do |hooks|
         hooks.push :auth_token_expiry
         hooks.push :temp_url_key_missing
