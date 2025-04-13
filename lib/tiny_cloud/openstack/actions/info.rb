@@ -10,7 +10,7 @@ module TinyCloud
         def request
           request_processor.call(
             {
-              url: URI.parse(context[:url]).origin,
+              url: context[:url].origin,
               path: 'info',
               method: :get,
               options: { headers: auth_manager.headers }

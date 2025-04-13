@@ -26,6 +26,10 @@ module TinyCloud
       end
     end
 
+    def origin
+      @origin
+    end
+
     def to_s
       @origin
         .then { |url| [url, the_path].compact.join }
