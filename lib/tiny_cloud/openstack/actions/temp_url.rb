@@ -7,7 +7,7 @@ module TinyCloud
       class TempUrl
         include TinyCloud::Chainable
 
-        attr_reader :root_url, :url, :prefix, :life_time, :default_life_time
+        attr_reader :url, :prefix, :life_time
 
         def supported?
           context.type == :container
@@ -15,37 +15,23 @@ module TinyCloud
 
         def request
           set_attributes
-          return [url, query_args].join('?') unless prefix
+          set_query_args
+          return url.to_s unless prefix
 
-          ->(path) { "#{url}#{path}?#{query_args}" }
+          ->(path) { url.add_to_path(path).to_s }
         end
 
         private
 
         def set_attributes
-          @url = [context.url, context.path].compact.join('/')
+          @url = TinyUrl.new( context.url ).add_to_path(context.path)
           @prefix = context.prefix
           @life_time = context.life_time || temp_url_manager.default_life_time
         end
 
-        def active_key
-          temp_url_manager.active_key.value
-        end
-
-        def query_args
-          [
-            "temp_url_sig=#{sig}",
-            "temp_url_expires=#{expires}",
-            query_prefix
-          ].compact.join('&')
-        end
-
-        def query_prefix
-          "&temp_url_prefix=#{prefix}" if prefix
-        end
-
-        def expires
-          (Time.now + life_time).to_i
+        def set_query_args
+          url.add_to_query(temp_url_sig: sig, temp_url_expires: expires)
+          url.add_to_query(temp_url_prefix: prefix) if prefix
         end
 
         def sig
@@ -53,15 +39,25 @@ module TinyCloud
           OpenSSL::HMAC.hexdigest(digest, active_key, my_data)
         end
 
+        def active_key
+          temp_url_manager.active_key.value
+        end
+
         def my_data
-          "#{context.method.to_s.upcase}\n#{expires}\n#{path}"
+          "#{http_method}\n#{expires}\n#{path}"
+        end
+
+        def http_method
+          context.method.to_s.upcase
+        end
+
+        def expires
+          (Time.now + life_time).to_i
         end
 
         def path
           # prefixed paths do not work..
-          [('prefix:' if prefix), url.gsub(configuration.root_url, '')]
-            .compact
-            .join
+          [('prefix:' if prefix), url.path].compact.join
         end
       end
     end
