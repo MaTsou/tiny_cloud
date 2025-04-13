@@ -24,7 +24,7 @@ module TinyCloud
         private
 
         def set_attributes
-          @url = TinyUrl.new( context.url ).add_to_path(context.path)
+          @url = TinyUrl.add_to_path(context.url, context.path)
           @prefix = context.prefix
           @life_time = context.life_time || temp_url_manager.default_life_time
         end

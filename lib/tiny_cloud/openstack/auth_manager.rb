@@ -28,7 +28,7 @@ module TinyCloud
       end
 
       def token_url
-        [config.auth_url, 'auth', 'tokens'].join('/')
+        TinyUrl.new(config.auth_url).add_to_path 'auth', 'tokens'
       end
 
       def headers

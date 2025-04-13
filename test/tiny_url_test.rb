@@ -37,10 +37,10 @@ describe TinyCloud::TinyUrl do
     @url_full.add_to_query(**added)
 
     org_only_encoded_query = URI.encode_www_form(**added)
-    full_encoded_query = URI.encode_www_form({ a: 'b', c: 'de' }.merge(added))
+    url_encoded_query = URI.encode_www_form({ a: 'b', c: 'de' }.merge(added))
 
     expected_org_only = "#{URL_ORG_ONLY}?#{org_only_encoded_query}"
-    expected_full = "#{URL_FULL_ORG}#{URL_FULL_PATH}?#{full_encoded_query}"
+    expected_full = "#{URL_FULL_ORG}#{URL_FULL_PATH}?#{url_encoded_query}"
 
     _(@url_org_only.to_s).must_equal expected_org_only
     _(@url_full.to_s).must_equal expected_full

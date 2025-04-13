@@ -3,7 +3,7 @@
 require_relative 'test_helper'
 
 F_ACCOUNT = 'my_fake_account'
-F_URL = 'my_fake_url'
+F_URL = 'http://my_fake_url'
 D_TYPE = :storage # default type
 
 describe TinyCloud::Storage do
@@ -14,7 +14,7 @@ describe TinyCloud::Storage do
   describe 'instanciation' do
     it 'returns correctly built instance' do
       storage = klass.new(F_ACCOUNT, url: F_URL)
-      _(storage.url).must_equal F_URL
+      _(storage.url.to_s).must_equal F_URL
       _(storage.account).must_equal F_ACCOUNT
       _(storage.type).must_equal D_TYPE
     end
@@ -24,7 +24,7 @@ describe TinyCloud::Storage do
       storage = klass.new(F_ACCOUNT, url: F_URL)
       container = storage.call(name)
 
-      _(container.url).must_equal [F_URL, name].join('/')
+      _(container.url.to_s).must_equal [F_URL, name].join('/')
       _(container.account).must_equal F_ACCOUNT
       _(container.type).must_equal :container
     end

@@ -5,8 +5,21 @@ require 'uri'
 module TinyCloud
   # A tiny url manager
   class TinyUrl
-    def initialize(str_url)
-      URI.parse(str_url).then do |uri|
+    class << self
+      # calling these to class methods leads to deep cloning...
+      def add_to_path(tiny_url, *args)
+        new(tiny_url).add_to_path(*args)
+      end
+
+      def add_to_query(tiny_url, **options)
+        new(tiny_url).add_to_query(**options)
+      end
+    end
+
+    def initialize(url)
+      # passing url.to_s to URI.parse gives the opportunity to initialize a
+      # TinyUrl given a TinyUrl : this is deep cloning...
+      URI.parse(url.to_s).then do |uri|
         @origin = uri.origin
         @path = build_path uri.path
         @query = build_query uri.query
@@ -31,6 +44,12 @@ module TinyCloud
     def add_to_query(**options)
       @query.merge! keys_to_sym(options) if options
       self
+    end
+
+    def ==(other)
+      @origin == other.instance_variable_get(:@origin) &&
+        the_path == other.send(:the_path) &&
+        @query == other.instance_variable_get(:@query)
     end
 
     private

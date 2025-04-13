@@ -28,11 +28,7 @@ module TinyCloud
     end
 
     def get_url(request)
-      join_paths request[:url], request[:path]
-    end
-
-    def join_paths(*paths)
-      paths.compact.join('/')
+      TinyUrl.add_to_path(request[:url], request[:path]).to_s
     end
   end
 end
