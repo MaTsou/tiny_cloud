@@ -7,7 +7,7 @@ module TinyCloud
 
     def initialize(account, url:, type: :storage)
       @account = account
-      @url = url
+      @url = TinyUrl.new(url)
       @type = type
       yield account.configuration if block_given?
     end
@@ -17,7 +17,7 @@ module TinyCloud
 
       container = self.class.new(
         account,
-        url: join_paths(url, sub_storage_name),
+        url: TinyUrl.add_to_path(url, sub_storage_name),
         type: :container
       )
       yield container if block_given?

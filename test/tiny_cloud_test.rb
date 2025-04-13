@@ -4,7 +4,7 @@ require_relative 'test_helper'
 
 Excon.defaults[:mock] = true
 
-URL = 'https://my_storage_url'
+URL = 'https://mystorage.url.com'
 AUTH_TOKEN = 'My wonderful auth token'
 AUTH_TOKEN_EXPIRES_AT = Time.new(2021, 10, 27, 12, 5, 7)
 TUK = 'My first temp url key'
@@ -52,7 +52,7 @@ describe TinyCloud::Storage do
 
   it 'correctly build list request' do
     Excon.stub(
-      { url: @storage.url, method: :get },
+      { url: @storage.url.to_s, method: :get },
       {}
     )
     @storage.list
@@ -60,7 +60,7 @@ describe TinyCloud::Storage do
 
   it 'correctly build read request on storage' do
     Excon.stub(
-      { url: @storage.url, method: :get },
+      { url: @storage.url.to_s, method: :get },
       {}
     )
     @storage.read
@@ -68,9 +68,9 @@ describe TinyCloud::Storage do
 
   it 'correctly build read request on container' do
     path = 'my_path'
-    url = [@storage.url, path].join('/')
+    url = TinyCloud::TinyUrl.add_to_path(@storage.url, path)
     Excon.stub(
-      { url: url, method: :get },
+      { url: url.to_s, method: :get },
       {}
     )
     @storage.read path: path
@@ -87,11 +87,11 @@ describe TinyCloud::Storage do
     before do
       @container = @storage.call('container')
       @path = 'john'
-      @url = [@container.url, @path].join('/')
+      @url = TinyCloud::TinyUrl.add_to_path(@container.url, @path)
       @method = :get
 
       Excon.stub(
-        { url: @container.url, method: @method },
+        { url: @container.url.to_s, method: @method },
         {
           status: 200,
           headers: {
@@ -112,7 +112,7 @@ describe TinyCloud::Storage do
 
     it 'correctly build temp_url' do
       res = @storage.call('container').temp_url(path: @path, method: @method)
-      _(res.split('?').first).must_equal @url
+      _(res.split('?').first).must_equal @url.to_s
 
       req_params = res.split('?').last.split('&').map { |r| r.split('=').first }
       _(req_params).must_include('temp_url_sig', 'temp_url_expires')
