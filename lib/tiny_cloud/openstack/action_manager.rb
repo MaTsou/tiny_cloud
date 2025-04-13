@@ -4,6 +4,10 @@ module TinyCloud
   module Openstack
     # openstack action manager
     class ActionManager < TinyCloud::ActionManager
+      register_action :info do |hooks|
+        hooks.push :auth_token_expiry
+      end
+
       register_action :list do |hooks|
         hooks.push :auth_token_expiry
       end
