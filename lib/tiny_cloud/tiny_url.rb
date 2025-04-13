@@ -16,6 +16,8 @@ module TinyCloud
       end
     end
 
+    attr_reader :origin
+
     def initialize(url)
       # passing url.to_s to URI.parse gives the opportunity to initialize a
       # TinyUrl given a TinyUrl : this is deep cloning...
@@ -26,18 +28,18 @@ module TinyCloud
       end
     end
 
-    def origin
-      @origin
-    end
-
     def to_s
       @origin
-        .then { |url| [url, the_path].compact.join }
-        .then { |url| [url, the_query].select(&:itself).join('?') }
+        .then { |url| [url, path].compact.join }
+        .then { |url| [url, query].select(&:itself).join('?') }
     end
 
     def path
-      the_path
+      @path.join('/')
+    end
+
+    def query
+      @query.any? && URI.encode_www_form(@query)
     end
 
     def add_to_path(*args)
@@ -52,19 +54,11 @@ module TinyCloud
 
     def ==(other)
       @origin == other.instance_variable_get(:@origin) &&
-        the_path == other.send(:the_path) &&
+        path == other.send(:path) &&
         @query == other.instance_variable_get(:@query)
     end
 
     private
-
-    def the_path
-      @path.join('/')
-    end
-
-    def the_query
-      @query.any? && URI.encode_www_form(@query)
-    end
 
     def build_path(uri_path)
       uri_path.empty? ? [''] : uri_path.split('/')
