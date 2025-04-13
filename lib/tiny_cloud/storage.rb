@@ -32,9 +32,8 @@ module TinyCloud
       )
     end
 
-    def respond_to_missing?(_action, **_options)
-      # FIXME: have to do better
-      true
+    def respond_to_missing?(action, **_options)
+      account.respond_to_action? action
     end
 
     private

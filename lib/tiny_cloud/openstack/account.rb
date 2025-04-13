@@ -21,6 +21,10 @@ module TinyCloud
       def call(action, context)
         @action_manager.call(action, context)
       end
+
+      def respond_to_action?(action)
+        action_manager.respond_to? action
+      end
     end
   end
 end
