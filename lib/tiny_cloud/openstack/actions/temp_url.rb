@@ -24,8 +24,8 @@ module TinyCloud
         private
 
         def set_attributes
-          @url = TinyUrl.add_to_path(context.url, context.path)
           @prefix = context.prefix
+          @url = TinyUrl.add_to_path(context.url, @prefix || context.path)
           @life_time = context.life_time || temp_url_manager.default_life_time
         end
 
@@ -56,8 +56,9 @@ module TinyCloud
         end
 
         def path
-          # prefixed paths do not work..
-          [('prefix:' if prefix), url.path].compact.join
+          return url.path unless prefix
+
+          "prefix:#{url.path}"
         end
       end
     end
